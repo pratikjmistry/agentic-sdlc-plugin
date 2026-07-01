@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub Issues — required for /push-to-pms when targeting GitHub. Token needs scopes: repo, issues, write:issues.",
+      "optional": true
+    },
+    "gitlab": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gitlab"],
+      "env": {
+        "GITLAB_PERSONAL_ACCESS_TOKEN": "${GITLAB_PERSONAL_ACCESS_TOKEN}",
+        "GITLAB_API_URL": "${GITLAB_API_URL}"
+      },
+      "description": "GitLab Issues + Epics — required for /push-to-pms when targeting GitLab. Token needs scopes: api, write_repository.",
+      "optional": true
+    },
+    "azure-devops": {
+      "command": "npx",
+      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "env": {
+        "AZURE_DEVOPS_ORG_URL": "${AZURE_DEVOPS_ORG_URL}",
+        "AZURE_DEVOPS_AUTH_METHOD": "pat",
+        "AZURE_DEVOPS_PAT": "${AZURE_DEVOPS_PAT}"
+      },
+      "description": "Azure DevOps Work Items — required for /push-to-pms when targeting ADO. PAT needs: Work Items (Read, Write, Manage).",
+      "optional": true
+    },
+    "jira": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-jira"],
+      "env": {
+        "JIRA_HOST": "${JIRA_HOST}",
+        "JIRA_USERNAME": "${JIRA_USERNAME}",
+        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}"
+      },
+      "description": "Jira — required for /push-to-pms when targeting Jira. API token from id.atlassian.com.",
+      "optional": true
+    },
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "@linear/mcp-server"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      },
+      "description": "Linear — required for /push-to-pms when targeting Linear. API key from Linear Settings → API.",
+      "optional": true
+    }
+  }
+}
