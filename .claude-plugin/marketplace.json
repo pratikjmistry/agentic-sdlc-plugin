@@ -1,0 +1,17 @@
+{
+  "name": "agentic-sdlc-plugin",
+  "owner": {
+    "name": "Pratik"
+  },
+  "description": "Agentic SDLC plugin — grill ideas, write PRDs, decompose features, generate issues, push to PMS",
+  "plugins": [
+    {
+      "name": "agentic-sdlc",
+      "source": ".",
+      "description": "Full SDLC workflow: /grill → /write-prd → /prd-to-features → /feature-to-issues → /push-to-pms",
+      "author": {
+        "name": "Pratik"
+      }
+    }
+  ]
+}
