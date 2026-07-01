@@ -12,8 +12,39 @@ A TEST issue is unblocked when **all its implementation siblings** (DB, API, UI,
 
 ## STEP 0 — Load test configuration
 
-Read these files from the project root. If any are missing, halt: *"Missing ai-context/ files. Run /agentic-sdlc:generate-project-constitution first."*
+### 0a — Check QMD availability
 
+Check whether QMD is active for this project:
+```bash
+qmd status
+```
+Or, if running as a Claude Code agent: call `mcp__plugin_qmd_qmd__status`.
+
+**If QMD is active and a collection for this project exists:** use QMD for all document retrieval throughout this session. Prefer `qmd query` / `mcp__plugin_qmd_qmd__query` for semantic lookups and `qmd get` / `mcp__plugin_qmd_qmd__get` for known file paths. Note the collection name. Direct `Read`/`cat` is acceptable only as a fallback if QMD is unavailable.
+
+**If QMD is installed but no project collection found:** warn the user:
+> ⚠️ QMD is installed but no collection found for this project. Run:
+> ```
+> qmd init && qmd embed -c [project-name]
+> ```
+> Proceeding with direct file reads. Re-run `qmd update && qmd embed -c [project-name]` after any changes to `ai-context/` or `docs/` to keep the index current.
+
+**If QMD is not available:** proceed with direct file reads. Consider recommending the `plugin:qmd` Claude Code plugin for faster retrieval in future runs.
+
+### 0b — Load configuration files
+
+Load via QMD (preferred) or direct read (fallback). If any are missing, halt:
+*"Missing ai-context/ files. Run /agentic-sdlc:generate-project-constitution first."*
+
+```
+# QMD preferred:
+qmd multi_get "ai-context/testing.md,ai-context/ralph-agent-spec.md,ai-context/project-constitution.md"
+
+# Fallback (if QMD unavailable):
+Read each file directly.
+```
+
+Files to load:
 - `ai-context/testing.md` — integration test framework, IT- file location conventions, test environment config
 - `ai-context/ralph-agent-spec.md` — branch strategy, PR target, max turns, failure labels
 - `ai-context/project-constitution.md`
@@ -60,6 +91,7 @@ Read `ai-context/issues.json` to get the dependency graph.
 > PMS: [platform] — [repo/project]
 > Local repo: [git remote url]
 > Test environment: [url/type] — ✅ reachable
+> QMD: [active — collection: [name] / unavailable — using direct reads]
 > Eligible TEST issues: [N]
 > Execution order: [ISSUE-ID-1], [ISSUE-ID-2], ...
 >
@@ -84,9 +116,20 @@ If none remain, exit and go to COMPLETION REPORT.
 
 Fetch the TEST issue from PMS. Extract feature reference (e.g. `F-03-auth`) and IT- test IDs.
 
-Read:
-- `docs/test-plan.md` → all IT- IDs for this feature. Every one must have a passing test.
-- `docs/features/F-XX-slug.md` → ACs your tests must validate.
+Load the feature doc and test plan via QMD (preferred) or direct read (fallback):
+```
+# QMD preferred:
+qmd query "feature [FEATURE-REF] acceptance criteria"
+qmd get "docs/features/F-XX-slug.md"
+qmd query "integration test IDs [FEATURE-REF] IT-"
+qmd get "docs/test-plan.md"
+
+# Fallback:
+Read docs/test-plan.md
+Read docs/features/F-XX-slug.md
+```
+
+Extract all IT- IDs for this feature from `docs/test-plan.md`. Every one must have a passing test.
 
 ---
 
@@ -104,7 +147,10 @@ git checkout -b test/[ISSUE-ID]-[slug]
 For each IT- ID in `docs/test-plan.md` for this feature:
 
 1. Write a test exercising the full stack (DB → service → API response) for that AC
-2. Follow file naming and location from `ai-context/testing.md`
+2. Follow file naming and location from `ai-context/testing.md`; query QMD for specific conventions:
+   ```
+   qmd query "integration test file naming location convention"
+   ```
 3. Tests must be independent — no shared mutable state between IT- tests
 4. Use real infrastructure unless `testing.md` explicitly allows mocking at the integration layer
 5. Name each test to include its IT- ID:
@@ -218,5 +264,6 @@ After processing (closing or blocking) the TEST issue:
 | Test environment goes down mid-loop | Halt current iteration. Label `env-issue` on the in-progress TEST issue. Exit loop and report. |
 | Cannot reach full IT- coverage within max turns | Label `needs-human`, list uncovered IT- IDs. Exit loop. |
 | PMS API error mid-loop | Retry once. If still failing, halt and report. |
+| QMD query returns no results | Fall back to direct file read. Do not halt. |
 
 **Never:** mock real infrastructure unless `testing.md` allows it, skip an IT- ID without logging a defect or fixing the test, merge with failing CI, close a TEST issue with outstanding unresolved failures.
