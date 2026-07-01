@@ -12,8 +12,39 @@ An E2E issue is unblocked when **all its TEST siblings** for the same feature ar
 
 ## STEP 0 — Load E2E configuration
 
-Read these files. If missing, halt: *"Missing ai-context/ files. Run /agentic-sdlc:generate-project-constitution first."*
+### 0a — Check QMD availability
 
+Check whether QMD is active for this project:
+```bash
+qmd status
+```
+Or, if running as a Claude Code agent: call `mcp__plugin_qmd_qmd__status`.
+
+**If QMD is active and a collection for this project exists:** use QMD for all document retrieval throughout this session. Prefer `qmd query` / `mcp__plugin_qmd_qmd__query` for semantic lookups and `qmd get` / `mcp__plugin_qmd_qmd__get` for known file paths. Note the collection name. Direct `Read`/`cat` is acceptable only as a fallback if QMD is unavailable.
+
+**If QMD is installed but no project collection found:** warn the user:
+> ⚠️ QMD is installed but no collection found for this project. Run:
+> ```
+> qmd init && qmd embed -c [project-name]
+> ```
+> Proceeding with direct file reads. Re-run `qmd update && qmd embed -c [project-name]` after any changes to `ai-context/` or `docs/` to keep the index current.
+
+**If QMD is not available:** proceed with direct file reads. Consider recommending the `plugin:qmd` Claude Code plugin for faster retrieval in future runs.
+
+### 0b — Load configuration files
+
+Load via QMD (preferred) or direct read (fallback). If any are missing, halt:
+*"Missing ai-context/ files. Run /agentic-sdlc:generate-project-constitution first."*
+
+```
+# QMD preferred:
+qmd multi_get "ai-context/testing.md,ai-context/ralph-agent-spec.md,ai-context/project-constitution.md"
+
+# Fallback (if QMD unavailable):
+Read each file directly.
+```
+
+Files to load:
 - `ai-context/testing.md` — E2E tool (Playwright/Cypress), project config, base URL, browser targets, staging URL
 - `ai-context/ralph-agent-spec.md` — branch strategy, PR target, max turns, failure labels
 - `ai-context/project-constitution.md`
@@ -31,7 +62,12 @@ git remote -v
 
 Make a test PMS API call to confirm authentication. Halt with error if it fails.
 
-**Staging environment check:** From `ai-context/testing.md`, get the staging base URL. Verify it is up:
+**Staging environment check:** From `ai-context/testing.md`, get the staging base URL. Query QMD if needed:
+```
+qmd query "staging base URL environment"
+```
+
+Verify staging is up:
 ```bash
 curl -s -o /dev/null -w "%{http_code}" [STAGING_BASE_URL]/health
 ```
@@ -59,6 +95,7 @@ Read `ai-context/issues.json` to get the dependency graph.
 > Local repo: [git remote url]
 > Staging: [staging URL] — ✅ reachable
 > E2E tool: [Playwright / Cypress — from testing.md]
+> QMD: [active — collection: [name] / unavailable — using direct reads]
 > Eligible E2E issues: [N]
 > Execution order: [ISSUE-ID-1], [ISSUE-ID-2], ...
 >
@@ -83,9 +120,20 @@ If none remain, exit and go to COMPLETION REPORT.
 
 Fetch the E2E issue from PMS. Extract feature reference (e.g. `F-03-auth`) and ST- test IDs.
 
-Read:
-- `docs/test-plan.md` → all ST- IDs for this feature. Every one must have a passing test or a logged defect.
-- `docs/features/F-XX-slug.md` → critical user flows to exercise.
+Load the feature doc and test plan via QMD (preferred) or direct read (fallback):
+```
+# QMD preferred:
+qmd query "feature [FEATURE-REF] critical user flows end to end"
+qmd get "docs/features/F-XX-slug.md"
+qmd query "E2E test IDs [FEATURE-REF] ST-"
+qmd get "docs/test-plan.md"
+
+# Fallback:
+Read docs/test-plan.md
+Read docs/features/F-XX-slug.md
+```
+
+Extract all ST- IDs for this feature. Every one must have a passing test or a logged defect.
 
 ---
 
@@ -103,7 +151,10 @@ git checkout -b e2e/[ISSUE-ID]-[slug]
 For each ST- ID in `docs/test-plan.md` for this feature:
 
 1. Write a test exercising the full browser flow for that user story
-2. Follow file location and naming from `ai-context/testing.md`
+2. Follow file location and naming from `ai-context/testing.md`; query QMD for specifics:
+   ```
+   qmd query "E2E Playwright Cypress test file naming location"
+   ```
 3. Use the Playwright project / Cypress config from `ai-context/testing.md` — do not create a new config
 4. Tests must be independent — use `beforeEach` setup/teardown to reset state
 5. Use dedicated test accounts or seeded test data. Never use production data.
@@ -222,5 +273,6 @@ Wait for CI. **Do not merge if CI is failing.** Once CI passes, merge.
 | Playwright/Cypress config broken (not a test bug) | Label `needs-human`, describe what is broken. Exit loop. |
 | Cannot reach all ST- IDs within max turns | Label `needs-human`, list uncovered IDs. Exit loop. |
 | PMS API error mid-loop | Retry once. If still failing, halt and report. |
+| QMD query returns no results | Fall back to direct file read. Do not halt. |
 
 **Never:** run against production, merge with failing CI, skip an ST- ID without logging a defect or fixing the test, close an E2E issue with an open regression, use production credentials or data.
