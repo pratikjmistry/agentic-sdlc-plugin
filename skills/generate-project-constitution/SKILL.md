@@ -132,6 +132,18 @@ These questions determine which files to generate and set the scope for everythi
 - npm / package registry / local distribution
 - Not yet decided / early stage
 
+**Q_INT. Integration layer** — What does "wiring a feature together" look like in this project? The INT layer in issue decomposition is the step that assembles all the atomic pieces (data layer, service layer, UI layer) into a working, end-to-end flow. Describe what that means here in one sentence.
+
+(This answer goes into `ai-context/architecture.md` as the **Integration Layer Definition** and is used by `/feature-to-issues` and Ralph-impl to scope and validate INT issues correctly.)
+
+Examples by project type:
+- Web app: "Registering components in the router and wiring them to API clients so the feature is reachable and functional in the running app"
+- Mobile app: "Adding the feature screen to the navigation stack and connecting it to the data layer so it is reachable and functional in the simulator"
+- Data pipeline: "Connecting pipeline stages in the orchestrator so data flows end-to-end from source to sink"
+- API platform: "Registering the service in the API gateway and wiring cross-service calls so the feature is reachable from the public surface"
+- Backend service: "Wiring the new endpoints into the router and connecting all middleware, auth, and service dependencies so the feature is reachable and functional"
+- CLI tool: "Registering the new command in the CLI entry point and wiring subcommands, options, and output handlers"
+
 ---
 
 #### Phase 2 — Team, Compliance, and Codebase
