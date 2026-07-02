@@ -203,6 +203,21 @@ Mark the issue as closed/done in the PMS using `pms-map.json` to find the PMS is
 
 ---
 
+### IMPL-7a — Verify INT issue exists for this feature
+
+Before checking feature completion, confirm this feature has at least one INT issue in `ai-context/issues.json` (layer `INT`, same feature prefix as the current issue).
+
+**If no INT issue exists:**
+- Post a comment on the current PMS issue:
+  > ⚠️ No INT issue found for [FEATURE]. The integration layer (end-to-end assembly of all feature pieces) is not covered. See `ai-context/architecture.md` — Integration Layer Definition — for what this should cover. A human must create and implement an INT issue before testing can begin.
+- Add label `needs-human` to the current issue
+- Exit the loop and include this in the completion report: "Feature [FEATURE] has no INT issue — loop paused."
+- Do not signal the TEST issue.
+
+**If an INT issue exists:** continue to IMPL-7.
+
+---
+
 ### IMPL-7 — Check feature completion and signal TEST
 
 After closing the issue, check whether ALL implementation siblings for the same feature are now closed:
