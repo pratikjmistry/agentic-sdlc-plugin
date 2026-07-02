@@ -124,7 +124,7 @@ Assign Epic IDs first (one per Feature group), then child IDs by layer:
 | Database | `DB` | `database` | Table definitions (fields, types, constraints), migration file specs, indexes, seed data if applicable | Ralph-impl |
 | Backend/API | `API` | `backend` | Service logic, endpoints, business rules | Ralph-impl |
 | Frontend/UI | `UI` | `frontend` | Components, pages, state | Ralph-impl |
-| Integration | `INT` | `integration` | Third-party APIs, cross-service calls | Ralph-impl |
+| Integration | `INT` | `integration` | End-to-end feature integration — wires all DB/API/UI pieces into a cohesive, working whole and verifies the feature works end-to-end as described in the feature doc. The project-specific definition of what "integration" means (e.g. assembling screens into navigation, connecting pipeline stages, wiring services via a gateway, composing modules into the application entry point) is captured in `ai-context/architecture.md` under **Integration Layer Definition** | Ralph-impl |
 | Integration Testing | `TEST` | `test` | Write IT- integration tests, validate acceptance criteria against running environment, API contract tests | Ralph-test |
 | End-to-End | `E2E` | `e2e` | Write ST- Playwright/Cypress flows for critical user paths, smoke test suite | Ralph-e2e |
 
@@ -160,7 +160,10 @@ For every child issue verify:
 
 ### Step 8 — Run Dependency Graph Validation
 
-Check for: circular dependencies, missing ID references, execution order inconsistencies. Halt and report all errors before generating any output.
+Check for: circular dependencies, missing ID references, execution order inconsistencies, and missing INT issues. Halt and report all errors before generating any output.
+
+**Additional check — INT issue presence:**
+For every feature group (Epic), verify at least one INT issue exists. If any feature has DB/API/UI issues but no INT issue, apply Rule 10 (auto-generate) before proceeding — do not halt, but flag the auto-generated issue in the HITL checkpoint.
 
 ```
 Dependency Graph Validation Failed
@@ -215,8 +218,9 @@ Use the `AskUserQuestion` tool to interactively collect confirmation. Present a 
   8. Every implementation issue has mapped UT- test IDs
   9. TEST issues cover all IT- IDs from test plan
   10. E2E issues cover all ST- smoke test IDs from test plan
+  11. Every feature has at least one INT issue covering end-to-end integration (auto-generated ones confirmed and scoped correctly)
 
-**If all 8 items are selected:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
+**If all 11 items are selected:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
 
 **If any items are NOT selected:** List each unconfirmed item, state "⛔ Issue Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
 
@@ -253,6 +257,17 @@ TEST issue for a feature → depends on ALL DB/API/UI/INT issues in the same fea
 
 ### Rule 9 — Test-Before-E2E (Always Blocking)
 E2E issue → depends on ALL TEST issues in the same feature group. E2E cannot run until integration tests are written and passing.
+
+### Rule 10 — INT Issue Required Per Feature (Always)
+Every feature that produces any DB, API, or UI issues **must** have at least one INT issue. The INT issue must depend on all DB/API/UI siblings in the same feature.
+
+If the feature breakdown produces DB/API/UI issues but no INT issue, **generate one** before presenting output:
+- **Title:** `[DOMAIN]-INT-001 — Integrate and verify end-to-end feature flow`
+- **Acceptance criteria:** The feature works end-to-end as described in the feature doc, with all components/layers integrated and verified in the target environment.
+- **Dependencies:** all DB/API/UI siblings in this feature group
+- **Note in HITL:** "INT-001 was auto-generated — confirm its scope reflects the project's integration layer definition in `ai-context/architecture.md`."
+
+This rule exists because atomic DB/API/UI issues each deliver an isolated piece. Without a dedicated INT issue, nobody owns the assembly step — the point at which the feature becomes a working, connected whole.
 
 ---
 
@@ -521,6 +536,7 @@ Epic issues appear first (execution_order: 0, parent_epic_id: null). Every child
 - Create issues spanning multiple services or layers
 - Skip dependencies, execution_order, or parent_epic_id on any issue
 - Include platform-specific fields (GitHub numbers, Jira keys, ADO IDs) in the JSON — that is /push-to-pms's job
+- Close a feature Epic without ensuring at least one INT issue covers end-to-end integration
 
 ### ALWAYS
 - Assign Epic IDs before child issue IDs, before building any dependency map
@@ -532,3 +548,4 @@ Epic issues appear first (execution_order: 0, parent_epic_id: null). Every child
 - Include test_ids on every child issue (empty array if no test plan)
 - Save the JSON manifest to `ai-context/issues.json` (in the connected project folder) before presenting the HITL checkpoint
 - End every run with the HITL Issue Review Checkpoint
+- Ensure every feature with DB/API/UI issues has at least one INT issue (auto-generate under Rule 10 if missing)
