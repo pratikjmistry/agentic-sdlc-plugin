@@ -1,7 +1,7 @@
 {
   "name": "agentic-sdlc",
-  "version": "0.1.0",
-  "description": "Agentic Software Development Lifecycle \u2014 end-to-end AI-driven workflow from idea to platform-ready issues. Covers requirement grilling, PRD writing, project constitution, feature decomposition, TDD test planning, issue structuring, and PMS delivery.",
+  "version": "0.5.0",
+  "description": "Agentic Software Development Lifecycle — end-to-end AI-driven workflow from idea to platform-ready issues. Covers requirement grilling, PRD writing, project constitution, feature decomposition, TDD test planning, issue structuring, PMS delivery, agentic implementation (Ralph), and bug reporting.",
   "author": {
     "name": "Pratik",
     "email": "pratikm@radixweb.com"
@@ -14,7 +14,9 @@
     "features",
     "issues",
     "tdd",
-    "project-management"
+    "project-management",
+    "ralph",
+    "bug-reporting"
   ],
   "skills": "./skills",
   "mcpServers": "./.mcp.json"
