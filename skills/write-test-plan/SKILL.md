@@ -299,8 +299,10 @@ Use the `AskUserQuestion` tool to interactively collect confirmation before proc
   4. No test case references implementation details
   5. Regression impact map accurately reflects feature dependencies
   6. Integration tests correctly identify real vs. stubbed dependencies
+  7. An automated traceability-check script/CI job exists (or is scoped as a same-cycle deliverable)
+     and covers every UT-/IT-/ST- ID in this plan — see `ai-context/testing.md`'s CI Gate
 
-**If all 6 items are selected:** State "✅ Test Plan Approved." Then instruct the user to run `/feature-to-issues`.
+**If all 7 items are selected:** State "✅ Test Plan Approved." Then instruct the user to run `/feature-to-issues`.
 
 **If any items are NOT selected:** List each unconfirmed item, state "⛔ Test Plan requires revision — do not proceed until all items are confirmed.", and halt.
         ☐ Requires Revision — do not proceed until gaps are addressed

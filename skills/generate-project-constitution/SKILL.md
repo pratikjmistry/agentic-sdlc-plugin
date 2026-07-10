@@ -334,7 +334,7 @@ Ask only the questions relevant to this project based on Phase 1–3 answers. Sk
 These answers directly populate `project-constitution.md`. Don't skip them.
 
 **Q27. What are the 3–5 non-negotiable principles that must never be violated in this project?**
-(Free text — examples: "No direct database access from the frontend", "All external APIs must be versioned", "No secrets in source code", "Every change must have a test", "Backward compatibility must never be broken without a deprecation period")
+(Free text — examples: "No direct database access from the frontend", "All external APIs must be versioned", "No secrets in source code", "Every change must have a test", "Backward compatibility must never be broken without a deprecation period". Also worth offering as candidates if the project has any external dependency or public-facing surface: "A single external-dependency failure (timeout, 5xx, malformed response) must never crash the whole process — it must degrade the one affected feature gracefully" and "No third-party API capability an FR depends on is assumed without checking real documentation or a spike first". Don't force these on every project, but surface them as options — both were root causes of production-breaking bugs when left unstated.)
 
 **Q28. Who has final decision authority for architectural changes?**
 (Free text — examples: "Tech Lead", "Architecture Review Board", "Any senior engineer via PR consensus", "CTO sign-off required")

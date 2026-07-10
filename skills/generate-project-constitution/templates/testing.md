@@ -50,6 +50,11 @@ Which test types block merge:
 - [ ] Linting and type-check
 - [ ] E2E tests — [advisory or blocking]
 - [ ] Regression suite — no RT- regressions
+- [ ] **Traceability check** — an automated script/CI job parses every UT-/IT-/ST- ID out of the test
+      plan, confirms each has a matching implemented test (per the Test ID traceability convention
+      below), and fails the build on any unmatched ID. This is a required deliverable, not optional —
+      a test-plan ID with a correctly written spec but no implemented test is exactly the kind of gap
+      that ships silently without this check. See "Traceability Check" below for what the script must do.
 
 ### Ralph Agent Testing Responsibilities
 
@@ -69,6 +74,21 @@ This section defines which Ralph agent type writes each category of tests. See `
 - **E2E test location:** [e.g. `tests/e2e/` — Playwright test files]
 - **Test naming convention:** [e.g. `describe('[module]') > it('[should do X when Y]')`]
 - **Test ID traceability:** each test file includes a comment mapping it to UT-/IT-/ST- IDs from the test plan
+
+### Traceability Check (required CI Gate item, not just a naming convention)
+
+A written test-plan ID with no matching implemented, passing test is a defect that ships silently — the
+only reliable way to catch that drift is a machine check, not a reviewer remembering to look. This
+project must generate a traceability-check script or CI job that:
+
+1. Parses every `UT-`/`IT-`/`ST-` ID out of `docs/test-plan.md` (or `ai-context/test-plan.md`).
+2. Scans the test suite for a matching ID comment per the Test ID traceability convention above.
+3. Fails the build (or produces a clearly flagged report, if advisory-only for this project) when any
+   test-plan ID has no matching implemented test, or when a test file references an ID that doesn't
+   exist in the test plan (stale reference).
+
+This is a required deliverable of the first `/write-test-plan` → `/feature-to-issues` cycle, generated
+alongside the test plan — not an after-the-fact audit built once drift is already suspected.
 
 ## Example Structure
 

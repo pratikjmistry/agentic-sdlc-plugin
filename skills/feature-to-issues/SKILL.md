@@ -432,7 +432,10 @@ If `test-plan.md` is not present, write: "No test plan available — define test
 
 - [ ] Code reviewed and approved
 - [ ] All acceptance criteria pass
-- [ ] All mapped UT- specs pass
+- [ ] All mapped UT- specs pass (implementer self-report)
+- [ ] Traceability-check script passes for this issue's mapped UT-/IT-/ST- IDs (machine-verified — see
+      `ai-context/testing.md` CI Gate; this is distinct from the self-report above and must not be
+      skipped even when the self-report is checked)
 - [ ] All mapped IT- tests pass (real vs. stubbed per test plan)
 - [ ] No mapped RT- regression tests broken in related features
 - [ ] Relevant ST- smoke tests pass on deployment

@@ -392,6 +392,18 @@ Use the ID format `AC-[n]`.
 
 *Minimum 4 scenarios. Cover: invalid input, unauthorized access, downstream service failure, concurrent operations, empty/zero states.*
 
+**State Cross-Product Table (mandatory whenever the Clarity Summary's State Matrix is non-empty):**
+
+> If any entity or actor in this feature has more than one state (session, account, subscription,
+> connection status, etc.), a fixed count of "4 scenarios" is not sufficient — every combination of
+> (entity state × actor state × entry point) must get an explicit row. A feature is not ready for
+> engineering until every cell below is filled, not just the primary/happy-path combination.
+
+| # | State Combination | Entry Point | Expected System Behavior |
+|---|--------------------|-------------|---------------------------|
+| 1 | | | |
+| 2 | | | |
+
 ---
 
 ### 12. 🛡️ Non-Functional Requirements
@@ -407,6 +419,15 @@ Use the ID format `AC-[n]`.
 
 #### Accessibility
 - [WCAG level target, keyboard navigation, screen reader requirements — if applicable]
+
+#### Resilience
+- [What happens to the rest of the system when this feature's dependency call fails — a single
+  external-dependency failure (timeout, 5xx, malformed response) must degrade this feature gracefully
+  and must never take down unrelated requests or crash the process. State the specific fallback:
+  stale-data display, cached last-known-good value, disabled control with a message, etc. — not just
+  "handle errors gracefully."]
+- [If this feature has multiple failure classes from the same dependency (e.g. rate-limit vs. timeout
+  vs. server error), state whether they all get the same fallback treatment or differ, explicitly.]
 
 > Do not write "the system should be secure." Write the specific control required.
 
@@ -448,10 +469,17 @@ Use the ID format `PT-[n]`.
 
 > Cross-service, external system, or infrastructure dependencies required before this feature can ship.
 
-| # | Dependency | Type | Owner | Blocking? |
-|---|-----------|------|-------|-----------|
-| 1 | | Internal Service | | Yes/No |
-| 2 | | External / Third Party | | Yes/No |
+| # | Dependency | Type | Owner | Blocking? | Contract Verified? |
+|---|-----------|------|-------|-----------|---------------------|
+| 1 | | Internal Service | | Yes/No | Y/N/N-A |
+| 2 | | External / Third Party | | Yes/No | Y/N |
+
+> **Contract Verified?** applies to any `External / Third Party` dependency this feature's FRs rely on
+> for a *specific* capability (a filter param, a response shape, which host serves an endpoint, a rate
+> or tier limit) — "Y" means that capability was checked against real documentation or a spike, not
+> assumed. Any row with `Blocking: Yes` and `Contract Verified: N` must be copied into §15 Open Questions
+> as a **blocking** item — do not proceed to `/prd-to-features` with an unverified external contract that
+> the FRs depend on.
 
 ---
 

@@ -152,6 +152,12 @@ Use this exact structure:
 ### Edge Cases & Error Handling
 - [Confirmed handling for each edge case discussed]
 
+### State Matrix (omit this section if no entity in scope has more than one state)
+- [Entity/actor with multiple states — list the states]
+- [For each relevant cross-product of entity state × actor state × entry point discussed,
+  one row: Combination → Confirmed behavior]
+- [Any UI component's confirmed loading/empty/error states and dismissal triggers, if applicable]
+
 ### Data & State
 - [What data is involved, where it lives, retention, ownership]
 
@@ -178,6 +184,21 @@ Use these as a mental checklist of domains to cover. Only ask where there are re
 - **Functional behavior** — What should the system do? Rules, outcomes, state transitions.
 - **User roles & workflows** — Who triggers this? What's the end-to-end flow? Permission boundaries?
 - **Edge cases & failure modes** — Concurrent access, empty states, partial failures, timeouts, invalid input.
+- **Entity lifecycle & state matrix** — For every entity or actor with more than one state (e.g. session:
+  valid/expired, account: active/pending-deletion, integration: connected/revoked), don't stop at the
+  primary state. Ask what happens for the *cross-product* of (entity state × actor state × entry point) —
+  e.g. "what happens when a user with a pending account deletion tries to sign in after their session has
+  expired?" A feature description that only covers the happy-path state combination is not yet clear.
+- **UI component contract** (when the feature includes interactive or overlay UI — dropdowns, panels,
+  modals, forms) — For every new interactive/overlay element, confirm: its loading state, its empty
+  state, its error state, and *every* way it can be dismissed (an explicit close control, Escape, clicking
+  outside it, and what happens immediately after a selection is made). Don't let "it closes" go unasked —
+  ask which of those triggers apply.
+- **Third-party contract verification** — When a feature depends on a specific capability of an external
+  API (a filter parameter, a text-search behavior, which host serves which endpoint, a rate/tier limit),
+  ask explicitly whether that capability has been checked against real documentation or a spike — not
+  assumed from the API's general purpose. If unverified, it must be flagged as a blocking Open Item in the
+  Clarity Summary, not silently treated as available.
 - **Technical constraints** — API boundaries, microservice ownership, SQL Server, .NET Core / React+TypeScript.
 - **Integration points** — External systems, internal services, third-party dependencies, notification pipelines.
 - **Data & state** — What data is created/mutated/deleted? Who owns it? Retention, sync, audit trail.
