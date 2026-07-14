@@ -115,12 +115,21 @@ Each agent:
 ### Ralph-impl parallelization
 
 If `/generate-project-constitution` declared multiple DDD bounded contexts (domains) in
-`ai-context/architecture.md`'s Domain Map, Ralph-impl runs as an **orchestrator**: each wave it spawns one
-domain-worker sub-agent per domain that currently has eligible issues, each in its own `git worktree`, so
-independent domains implement concurrently instead of one issue at a time. Issues within the same domain
-still run sequentially, by the same worker, to avoid intra-domain file conflicts. Concurrency is capped by
-`Max parallel domain agents` in `ai-context/ralph-agent-spec.md` (default 4). Projects with a single domain
-(or no Domain Map) fall back to the original fully-sequential loop automatically.
+`ai-context/architecture.md`'s Domain Map, Ralph-impl runs as an **orchestrator** with two nested tiers of
+parallelism:
+- **Across domains:** each wave it spawns one domain-worker sub-agent per domain that currently has
+  eligible issues, each in its own `git worktree`, so independent domains implement concurrently instead
+  of one issue at a time. Capped by `Max parallel domain agents` (default 4).
+- **Within a domain:** a domain worker stages its own issues by layer (DB → API → UI → INT); two or more
+  issues in the same stage are, by construction, mutually independent (both were eligible at once, so
+  neither blocks the other), so the domain worker spawns one nested issue-worker sub-agent per issue in
+  that stage, each in a sibling `git worktree`. Capped by `Max parallel issue workers per stage` (default
+  3). Occasional merge conflicts between siblings are expected and handled (rebase and retry), not a sign
+  of a bug.
+
+Both settings live in `ai-context/ralph-agent-spec.md`. Projects with a single domain (or no Domain Map,
+or only one eligible issue in the current stage) fall back to the original fully-sequential loop
+automatically.
 
 ### E2E tests are never part of the CI pipeline
 

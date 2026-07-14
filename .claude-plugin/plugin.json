@@ -1,6 +1,6 @@
 {
   "name": "agentic-sdlc",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Agentic Software Development Lifecycle — end-to-end AI-driven workflow from idea to platform-ready issues. Covers requirement grilling, PRD writing, project constitution (with DDD bounded-context mapping), feature decomposition, TDD test planning, issue structuring, PMS delivery, domain-parallel agentic implementation (Ralph), and bug reporting.",
   "author": {
     "name": "Pratik",

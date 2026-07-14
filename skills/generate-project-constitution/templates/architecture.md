@@ -19,11 +19,13 @@
   - Cross-domain interaction happens only through the domain's declared public interface (a service
     method, an API endpoint, or an event) — never through shared tables, shared mutable state, or reaching
     into another domain's internal modules/files.
-  - **This map is the parallel-safety boundary for the Ralph implementation loop.** Two issues whose IDs
-    carry different domain codes are assumed to touch disjoint files/tables and are safe to implement
-    concurrently by separate sub-agents. Issues sharing a domain code are still implemented sequentially,
-    by the same sub-agent, because they may touch shared files within that domain (routers, schema
-    barrels, shared domain types). See `ai-context/ralph-agent-spec.md` — Parallelization Model.
+  - **This map is the parallel-safety boundary for the Ralph implementation loop, at two nested levels.**
+    Two issues whose IDs carry different domain codes are assumed to touch disjoint files/tables and are
+    safe to implement concurrently by separate domain sub-agents. Two issues that share a domain code but
+    are both independently eligible at the same time (neither blocks the other) are *also* implemented
+    concurrently, by nested issue-level sub-agents within that domain's worker — layer-ordered (DB before
+    API before UI before INT) so the natural build sequence is preserved even without an explicit
+    dependency edge between them. See `ai-context/ralph-agent-spec.md` — Parallelization Model.
   - If the project is a true monolith with no meaningful domain separation, state that explicitly here
     (e.g. "Single domain — CORE. No cross-domain boundaries; Ralph-impl runs fully sequential.") rather
     than inventing artificial domains.

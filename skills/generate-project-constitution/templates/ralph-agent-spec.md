@@ -17,20 +17,33 @@ Define the Ralph agent types in use on this project:
 
 ### Parallelization Model (Ralph-impl only)
 
-Ralph-impl reads the Bounded Contexts / Domain Map in `ai-context/architecture.md` to decide how to run:
+Ralph-impl reads the Bounded Contexts / Domain Map in `ai-context/architecture.md` to decide how to run,
+using two nested tiers of parallelism:
 
-- **Multiple domains declared, multiple domains eligible:** Ralph-impl acts as an orchestrator. Each wave,
-  it spawns one domain-worker sub-agent per eligible domain (up to the concurrency cap below), each in its
-  own `git worktree`, so independent bounded contexts are implemented concurrently without file conflicts.
-  Issues within the same domain are still processed sequentially by that domain's one worker.
-- **Single domain declared, or only one domain has eligible work:** fully sequential — no worktrees, no
-  sub-agents. This is the same behaviour as before domain-based parallelism existed.
+- **Tier 1 — across domains:** if 2+ domains have eligible work, Ralph-impl acts as an orchestrator. Each
+  wave, it spawns one domain-worker sub-agent per eligible domain (up to the domain concurrency cap
+  below), each in its own `git worktree`, so independent bounded contexts are implemented concurrently
+  without file conflicts.
+- **Tier 2 — within a domain:** a domain worker groups its own issues into layer-ordered stages (DB → API
+  → UI → INT). Two or more issues in the same stage were, by construction, all confirmed independent by
+  the eligibility scan (co-eligible issues cannot block each other), so the domain worker spawns one
+  nested issue-worker sub-agent per issue in the stage (up to the issue concurrency cap below), each in
+  its own sibling `git worktree`. A stage with exactly one issue runs directly, no nested spawn. Stages
+  still run in fixed layer order — only issues within the *same* stage run concurrently with each other.
+- **Single domain declared, or only one domain has eligible work, and that domain's current stage has only
+  one issue:** fully sequential — no worktrees, no sub-agents. This is the same behaviour as before
+  domain-based parallelism existed.
+
+Occasional PR merge conflicts between sibling issues in the same stage (e.g. two issues both touching a
+shared router/schema file) are an accepted, already-handled cost of this model — the losing PR rebases and
+retries — not a sign the model is unsafe. See `agents/ralph-impl.md` — FAILURE HANDLING.
 
 | Setting | Value |
 |---------|-------|
 | Max parallel domain agents | [e.g. 4 — cap on concurrent domain workers per wave; tune to the team's CI/infra capacity, not just core count] |
-| Worktree path convention | [e.g. `../[repo-name]-wt-[domain-lowercase]`, cleaned up by the worker after each wave] |
-| Cross-domain merge coordination | Domain workers never hold a local checkout of the base branch — they branch each issue's feature branch directly off `origin/[base branch]` and merge via the PMS/platform API (server-side, safe to run concurrently). Feature-completion checks (INT verification, TEST-unblock signalling) run once centrally in the orchestrator after each wave, never inside a worker, to avoid two domains racing to post the same signal. |
+| Max parallel issue workers per stage | [e.g. 3 — cap on concurrent issue workers *within one domain's current stage*; total worst-case concurrency this wave ≈ (active domains) × (this cap), so size both settings together against real CI/infra capacity, not independently] |
+| Worktree path convention | [e.g. domain worker: `../[repo-name]-wt-[domain-lowercase]`; issue worker: `../[repo-name]-wt-[domain-lowercase]-[issue-suffix-lowercase]`, sibling to its parent domain worker's worktree — both cleaned up by their owner after use] |
+| Cross-domain / cross-issue merge coordination | Workers at both tiers never hold a local checkout of the base branch — they branch each issue's feature branch directly off `origin/[base branch]` and merge via the PMS/platform API (server-side, safe to run concurrently). Feature-completion checks (INT verification, TEST-unblock signalling) run once centrally in the orchestrator after each wave, never inside a domain or issue worker, to avoid racing to post the same signal. |
 
 ### Handover Model
 
@@ -121,7 +134,7 @@ What each agent type must produce:
 | Ralph-e2e | E2E | claude-sonnet-4-5 |
 
 ## Parallelization Model
-Ralph-impl: orchestrator/worker split by domain (from architecture.md Domain Map). Max 4 parallel domain agents, one git worktree each at ../repo-name-wt-[domain]. Feature-completion checks run centrally in the orchestrator, never in a worker.
+Ralph-impl: two-tier orchestrator/worker split. Tier 1 by domain (from architecture.md Domain Map, max 4 parallel domain agents, one git worktree each at ../repo-name-wt-[domain]). Tier 2 by layer-stage within a domain (max 3 parallel issue workers per stage, sibling worktrees). Feature-completion checks run centrally in the orchestrator, never in a domain or issue worker.
 
 ## Handover
 Implicit via issues.json dependency graph. TEST issues unblock when all implementation siblings are closed. E2E issues unblock when TEST siblings are closed.

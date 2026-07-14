@@ -57,10 +57,13 @@ GREENFIELD:
 
 **Domain alignment (required):** DOMAIN must match a domain code declared in the Bounded Contexts /
 Domain Map in `ai-context/architecture.md` — not an arbitrary abbreviation invented per feature. The Ralph
-implementation loop uses DOMAIN as its parallel-safety boundary (see `ai-context/ralph-agent-spec.md` —
-Parallelization Model): issues in different domains run concurrently in separate sub-agents/worktrees on
-the assumption that they touch disjoint files, so a DOMAIN prefix that doesn't correspond to a real
-bounded context risks silent file conflicts during parallel execution.
+implementation loop uses DOMAIN as its parallel-safety boundary at two nested levels (see
+`ai-context/ralph-agent-spec.md` — Parallelization Model): issues in different domains run concurrently in
+separate domain sub-agents/worktrees, and issues that share a domain but are mutually independent (no
+`blocking` dependency between them, per the LAYER-ordered execution graph this skill builds) run
+concurrently in nested issue-level sub-agents within that domain. Both levels rely on the assumption that
+same-domain issues stay inside the domain's owned files, so a DOMAIN prefix that doesn't correspond to a
+real bounded context risks silent file conflicts during parallel execution.
 
 - If a Feature's work fits entirely inside one declared domain, use that domain's code as DOMAIN.
 - If a Feature spans multiple declared domains (e.g. an `ORDERS` feature that also touches `BILLING`),
