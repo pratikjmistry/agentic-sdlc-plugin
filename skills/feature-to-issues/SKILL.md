@@ -55,6 +55,21 @@ GREENFIELD:
 | LAYER | Fixed values: `DB`, `API`, `UI`, `INT` | `DB`, `API`, `UI`, `INT` |
 | NNN | Zero-padded 3-digit sequence within layer, starting at 001 | `001`, `002`, `015` |
 
+**Domain alignment (required):** DOMAIN must match a domain code declared in the Bounded Contexts /
+Domain Map in `ai-context/architecture.md` — not an arbitrary abbreviation invented per feature. The Ralph
+implementation loop uses DOMAIN as its parallel-safety boundary (see `ai-context/ralph-agent-spec.md` —
+Parallelization Model): issues in different domains run concurrently in separate sub-agents/worktrees on
+the assumption that they touch disjoint files, so a DOMAIN prefix that doesn't correspond to a real
+bounded context risks silent file conflicts during parallel execution.
+
+- If a Feature's work fits entirely inside one declared domain, use that domain's code as DOMAIN.
+- If a Feature spans multiple declared domains (e.g. an `ORDERS` feature that also touches `BILLING`),
+  split its issues by domain — each issue's DOMAIN prefix reflects the domain whose files it actually
+  touches, not the Feature's name. Note the split in the HITL checkpoint.
+- If `architecture.md` has no Domain Map (or declares a single domain), fall back to the Feature-based
+  abbreviation as before and note in the HITL checkpoint that Ralph-impl will run this project fully
+  sequential (no domain-based parallelism available).
+
 **Epic Format:** `[DOMAIN]-EPIC`
 
 One Epic per Feature group. Exactly one per Feature — no sequence number.
@@ -76,6 +91,30 @@ AUTH-EPIC
 
 ---
 
+## Title Convention (applies to the `title` field written into `issues.json`, not just the human-readable doc headings)
+
+Every issue's PMS-facing `title` — the exact string `/push-to-pms` sends to the platform — must carry a
+bracketed prefix so an issue's type and traceability ID are recognizable at a glance in any PMS list view,
+regardless of platform:
+
+| Type | Prefix | Example |
+|------|--------|---------|
+| Epic | `[EPIC]` | `[EPIC] Authentication (F-01)` |
+| Child issue (DB/API/UI/INT/TEST/E2E) | `[[DOMAIN]-[LAYER]-[NNN]]` — the issue's own ID | `[AUTH-DB-001] Create users table migration` |
+| Bug/defect (opened by Ralph-test, Ralph-e2e, or `/report-bug`) | `[BUG][SEVERITY]` or `[BUG][IT-NNN]` / `[BUG][E2E-NNN]` | `[BUG][HIGH] Watchlist fails to load...` — see `report-bug` SKILL.md, the canonical defect format |
+
+Rules:
+- The prefix is always the **first** token of `title` — nothing precedes it.
+- For child issues, the bracketed prefix is the issue's own `id` field, not its parent Epic or a generic
+  layer word — this is what makes an issue traceable back to `issues.json` / `pms-map.json` from the PMS
+  UI alone, and is what Ralph agents, humans, and the domain-parallel Ralph-impl worker reports (see
+  `agents/ralph-impl.md`) grep for when scanning PR titles, commit messages, and PMS issue lists.
+- `/push-to-pms` must not strip or rewrite this prefix even on platforms where the issue type is already
+  shown natively (e.g. Jira/ADO Epic icons, GitLab Epic objects) — the textual prefix is what stays
+  greppable in commit messages, PR titles, and cross-platform search, independent of any UI chrome.
+
+---
+
 ## Execution Instructions
 
 ### Step 1 — Load Context Files
@@ -85,7 +124,7 @@ Load before any output:
 2. `ai-context/architecture.md`
 3. `ai-context/coding-standards.md`
 4. `ai-context/testing.md`
-5. `ai-context/test-plan.md` — extract all UT-, IT-, ST-, RT- test IDs keyed to each FR-n, AC-n, and US-XX.N
+5. `ai-context/test-plan.md` — extract all UT-, IT-, E2E-, RT- test IDs keyed to each FR-n, AC-n, and US-XX.N
 6. `ai-context/database-guidelines.md` — load naming conventions, ID strategy, migration tooling, auditing approach, soft-delete strategy, and ORM guidance. Apply these to all DB-layer issues.
 7. **Entity Ownership Map** — read the `## Entity Ownership` table from `docs/features/feature-summary.md`. Build an in-memory map of which feature owns which entities. Use this to generate correct schema/migration tasks per feature and to avoid duplicate entity definitions across features.
 
@@ -126,7 +165,7 @@ Assign Epic IDs first (one per Feature group), then child IDs by layer:
 | Frontend/UI | `UI` | `frontend` | Components, pages, state | Ralph-impl |
 | Integration | `INT` | `integration` | End-to-end feature integration — wires all DB/API/UI pieces into a cohesive, working whole and verifies the feature works end-to-end as described in the feature doc. The project-specific definition of what "integration" means (e.g. assembling screens into navigation, connecting pipeline stages, wiring services via a gateway, composing modules into the application entry point) is captured in `ai-context/architecture.md` under **Integration Layer Definition** | Ralph-impl |
 | Integration Testing | `TEST` | `test` | Write IT- integration tests, validate acceptance criteria against running environment, API contract tests | Ralph-test |
-| End-to-End | `E2E` | `e2e` | Write ST- Playwright/Cypress flows for critical user paths, smoke test suite | Ralph-e2e |
+| End-to-End | `E2E` | `e2e` | Write E2E- Playwright/Cypress flows for critical user paths, smoke test suite | Ralph-e2e |
 
 Assign in this order: DB → API → UI → INT → TEST → E2E. This reflects execution dependency direction.
 
@@ -217,10 +256,11 @@ Use the `AskUserQuestion` tool to interactively collect confirmation. Present a 
   7. Epic groupings reflect Feature boundaries
   8. Every implementation issue has mapped UT- test IDs
   9. TEST issues cover all IT- IDs from test plan
-  10. E2E issues cover all ST- smoke test IDs from test plan
+  10. E2E issues cover all E2E- smoke test IDs from test plan
   11. Every feature has at least one INT issue covering end-to-end integration (auto-generated ones confirmed and scoped correctly)
+  12. Every issue's DOMAIN prefix matches a declared bounded context in architecture.md (or the project is confirmed single-domain)
 
-**If all 11 items are selected:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
+**If all 12 items are selected:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
 
 **If any items are NOT selected:** List each unconfirmed item, state "⛔ Issue Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
 
@@ -262,7 +302,7 @@ E2E issue → depends on ALL TEST issues in the same feature group. E2E cannot r
 Every feature that produces any DB, API, or UI issues **must** have at least one INT issue. The INT issue must depend on all DB/API/UI siblings in the same feature.
 
 If the feature breakdown produces DB/API/UI issues but no INT issue, **generate one** before presenting output:
-- **Title:** `[DOMAIN]-INT-001 — Integrate and verify end-to-end feature flow`
+- **Title:** `[[DOMAIN]-INT-001] Integrate and verify end-to-end feature flow`
 - **Acceptance criteria:** The feature works end-to-end as described in the feature doc, with all components/layers integrated and verified in the target environment.
 - **Dependencies:** all DB/API/UI siblings in this feature group
 - **Note in HITL:** "INT-001 was auto-generated — confirm its scope reflects the project's integration layer definition in `ai-context/architecture.md`."
@@ -275,9 +315,10 @@ This rule exists because atomic DB/API/UI issues each deliver an isolated piece.
 
 ---
 
-### [DOMAIN]-EPIC — [Epic] Feature Name (F-XX)
+### [DOMAIN]-EPIC — [EPIC] Feature Name (F-XX)
 
 **Epic ID:** `[DOMAIN]-EPIC`
+**PMS Title:** `[EPIC] Feature Name (F-XX)` — this exact string is the `title` field in the JSON manifest, per the Title Convention above
 **Feature Reference:** F-XX
 **PRD Reference:** FR-[n] to FR-[n]
 **Category:** `epic`
@@ -314,7 +355,7 @@ This rule exists because atomic DB/API/UI issues each deliver an isolated piece.
 - [ ] All child issues are resolved
 - [ ] Feature acceptance criteria from PRD are met end-to-end
 - [ ] All regression tests (RT-) mapped to this feature's ACs are passing
-- [ ] Smoke tests (ST-) covering this feature's critical path are passing on deployment
+- [ ] Smoke tests (E2E-) covering this feature's critical path are passing on deployment
 - [ ] No open blocking dependencies remain
 
 ---
@@ -326,6 +367,7 @@ This rule exists because atomic DB/API/UI issues each deliver an isolated piece.
 ### [DOMAIN]-[LAYER]-[NNN] — [Title]
 
 **Issue ID:** `[DOMAIN]-[LAYER]-[NNN]`
+**PMS Title:** `[[DOMAIN]-[LAYER]-[NNN]] [Title]` — this exact string is the `title` field in the JSON manifest, per the Title Convention above
 **Layer:** Database / Backend / Frontend / Integration
 **Execution Order:** [N]
 **Parent Epic:** `[DOMAIN]-EPIC`
@@ -422,7 +464,7 @@ Populate from `/ai-context/test-plan.md` by matching this issue's FR-n, AC-n, an
 | IT-[N] | Integration | US-XX.N | [What cross-boundary behavior is verified] |
 | RT-[N] | Regression | AC-n | [What must not regress] |
 
-Smoke coverage: list any ST- test IDs that exercise this issue's critical path. Mark blocking ones explicitly.
+Smoke coverage: list any E2E- test IDs that exercise this issue's critical path. Mark blocking ones explicitly.
 
 If `test-plan.md` is not present, write: "No test plan available — define test cases during implementation."
 
@@ -433,12 +475,12 @@ If `test-plan.md` is not present, write: "No test plan available — define test
 - [ ] Code reviewed and approved
 - [ ] All acceptance criteria pass
 - [ ] All mapped UT- specs pass (implementer self-report)
-- [ ] Traceability-check script passes for this issue's mapped UT-/IT-/ST- IDs (machine-verified — see
+- [ ] Traceability-check script passes for this issue's mapped UT-/IT-/E2E- IDs (machine-verified — see
       `ai-context/testing.md` CI Gate; this is distinct from the self-report above and must not be
       skipped even when the self-report is checked)
 - [ ] All mapped IT- tests pass (real vs. stubbed per test plan)
 - [ ] No mapped RT- regression tests broken in related features
-- [ ] Relevant ST- smoke tests pass on deployment
+- [ ] Relevant E2E- smoke tests pass on deployment
 - [ ] No regressions in related services
 - [ ] [Layer-specific item]
 
@@ -450,7 +492,7 @@ If `test-plan.md` is not present, write: "No test plan available — define test
 
 | Execution Order | Issue ID | Title | Layer | Depends On | Can Parallelise With |
 |----------------|---------|-------|-------|-----------|----------------------|
-| 0 (Epic) | AUTH-EPIC | [Epic] Authentication | Epic | None | other Epics |
+| 0 (Epic) | AUTH-EPIC | [EPIC] Authentication | Epic | None | other Epics |
 | 1 | AUTH-DB-001 | [title] | Database | None | AUTH-DB-002 |
 | 2 | AUTH-API-001 | [title] | Backend | AUTH-DB-001 | None |
 | 3 | AUTH-UI-001 | [title] | Frontend | AUTH-API-001 | None |
@@ -482,7 +524,7 @@ Epic issues appear first (execution_order: 0, parent_epic_id: null). Every child
 [
   {
     "id": "AUTH-EPIC",
-    "title": "[Epic] Authentication (F-01)",
+    "title": "[EPIC] Authentication (F-01)",
     "body": "## Overview\n\n...\n\n## User Stories Covered\n\n...\n\n## Definition of Done (Epic)\n\n- [ ] All child issues resolved",
     "type": "epic",
     "category": ["epic", "feature"],
@@ -495,7 +537,7 @@ Epic issues appear first (execution_order: 0, parent_epic_id: null). Every child
   },
   {
     "id": "AUTH-DB-001",
-    "title": "Create users table migration",
+    "title": "[AUTH-DB-001] Create users table migration",
     "body": "## Description\n\n...\n\n## Acceptance Criteria\n\n- [ ] AC-1: Given...\n\n## Definition of Done\n\n- [ ] Code reviewed\n- [ ] ACs pass\n- [ ] Tests passing",
     "type": "task",
     "category": ["database", "auth"],
@@ -504,7 +546,7 @@ Epic issues appear first (execution_order: 0, parent_epic_id: null). Every child
     "parent_epic_id": "AUTH-EPIC",
     "dependencies": [],
     "prd_references": ["FR-01", "AC-01"],
-    "test_ids": ["UT-01", "UT-02", "RT-01"]
+    "test_ids": ["UT-001", "UT-002", "RT-001"]
   }
 ]
 ```
@@ -514,7 +556,7 @@ Epic issues appear first (execution_order: 0, parent_epic_id: null). Every child
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Yes | Epic: [DOMAIN]-EPIC. Child: [DOMAIN]-[LAYER]-[NNN]. Uppercase, stable across downstream tools. |
-| `title` | string | Yes | Epics prefixed [Epic]. Matches human-readable title exactly. |
+| `title` | string | Yes | Epics prefixed `[EPIC]`. Child issues prefixed with their own `id` in brackets, e.g. `[AUTH-DB-001]`. See Title Convention above — this is the exact string sent to the PMS, never stripped or rewritten by /push-to-pms. |
 | `body` | string | Yes | Full markdown content. Portable across all platforms. |
 | `type` | string | Yes | `"epic"` for Epics. `"task"` for child issues. Platform mapping handled by /push-to-pms. |
 | `category` | string[] | Yes | Semantic labels. Epics: ["epic", "feature"]. Children: layer + service. Platform mapping handled by /push-to-pms. |
@@ -525,7 +567,7 @@ Epic issues appear first (execution_order: 0, parent_epic_id: null). Every child
 | `dependencies[].id` | string | Yes | Must reference a valid child issue id in this array. |
 | `dependencies[].type` | string | Yes | "blocking", "parallel", or "integration". |
 | `prd_references` | string[] | Yes | FR-n, AC-n references that this issue satisfies. |
-| `test_ids` | string[] | Yes | UT-, IT-, RT-, ST- IDs from test-plan.md that this issue must satisfy. Empty array if no test plan. |
+| `test_ids` | string[] | Yes | UT-, IT-, RT-, E2E- IDs from test-plan.md that this issue must satisfy. Empty array if no test plan. |
 
 ---
 

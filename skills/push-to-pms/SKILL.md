@@ -45,8 +45,21 @@ Validate the manifest:
 - At least one item with a valid `parent_epic_id`
 - All `dependencies[].id` references resolve to items in the array
 - `execution_order` values are present on all items
+- **Title prefix convention** — every `title` starts with its required bracketed prefix: `[EPIC]` for
+  `"type": "epic"` items, or `[<own id>]` (e.g. `[AUTH-DB-001]`) for child items. This is the same string
+  `/feature-to-issues` is required to have already written — see its Title Convention section. If any
+  item's `title` is missing or has the wrong prefix (e.g. hand-edited manifest, or an older manifest
+  generated before this convention existed), **fix it in memory before creating anything** — prepend the
+  correct prefix rather than halting, since this is mechanically derivable from `id`/`type` and shouldn't
+  block delivery. Report which titles were auto-fixed in the Step 7 summary.
 
-If validation fails, report the specific errors and do not proceed.
+If any other validation fails, report the specific errors and do not proceed.
+
+**Do not strip or reformat this prefix per platform**, even where the platform already shows the issue
+type natively (Jira/ADO Epic icons, GitLab Epic objects) — the bracketed prefix is what keeps issues
+searchable and traceable back to `issues.json`/`pms-map.json` from plain-text contexts (PR titles, commit
+messages, cross-platform search) where the platform's UI chrome isn't available. Send `title` through to
+each platform's title/name field exactly as validated above.
 
 ### Step 2 — Platform Selection
 
@@ -401,7 +414,7 @@ After all items are created, save `/ai-context/pms-map.json`:
       "internal_id": "AUTH-EPIC",
       "platform_id": "42",
       "platform_url": "https://github.com/myorg/myrepo/issues/42",
-      "title": "[Epic] Authentication (F-01)",
+      "title": "[EPIC] Authentication (F-01)",
       "type": "epic"
     }
   ],
@@ -419,14 +432,15 @@ PUSH TO PMS — COMPLETE
 Platform : [Platform Name]
 Project  : [project path or key]
 
-| Internal ID  | Title                        | Type  | Platform ID | URL   | Status  |
-|-------------|------------------------------|-------|-------------|-------|---------|
-| AUTH-EPIC   | [Epic] Authentication        | Epic  | #42         | [url] | Created |
-| AUTH-DB-001 | Create users table migration | Task  | #43         | [url] | Created |
+| Internal ID  | Title                                       | Type  | Platform ID | URL   | Status  |
+|-------------|---------------------------------------------|-------|-------------|-------|---------|
+| AUTH-EPIC   | [EPIC] Authentication                        | Epic  | #42         | [url] | Created |
+| AUTH-DB-001 | [AUTH-DB-001] Create users table migration   | Task  | #43         | [url] | Created |
 
 Epics created   : N
 Tasks created   : N
 Links wired     : N
+Titles auto-fixed : N (missing/wrong prefix — corrected before creation; 0 if manifest was already compliant)
 Failures        : N (see below if any)
 
 Mapping saved to: /ai-context/pms-map.json

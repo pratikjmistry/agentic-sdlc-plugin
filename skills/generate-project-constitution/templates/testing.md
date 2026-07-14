@@ -18,7 +18,7 @@ Defines the testing strategy, tooling, coverage requirements, and agent responsi
 |-------|------|----------------|---------|
 | Unit | [tool] | [threshold]% | Blocks merge |
 | Integration | [tool] | Key paths covered | Blocks merge |
-| E2E / Smoke | [Playwright/Cypress] | Critical user flows | Advisory (speed) |
+| E2E / Smoke | [Playwright/Cypress] | Critical user flows | **Not in the PR/merge pipeline at all — separate manually-triggered workflow. See E2E Test Trigger Model below.** |
 | Regression | [tool] | All prior ACs | Blocks merge |
 
 ### What Must Be Tested
@@ -44,17 +44,40 @@ Defines the testing strategy, tooling, coverage requirements, and agent responsi
 
 ### CI Gate
 
-Which test types block merge:
+Which test types block merge, on every PR / push to the default branch:
 - [ ] Unit tests — [threshold]% coverage
 - [ ] Integration tests — all mapped IT- IDs pass
 - [ ] Linting and type-check
-- [ ] E2E tests — [advisory or blocking]
 - [ ] Regression suite — no RT- regressions
-- [ ] **Traceability check** — an automated script/CI job parses every UT-/IT-/ST- ID out of the test
+- [ ] **Traceability check** — an automated script/CI job parses every UT-/IT-/E2E- ID out of the test
       plan, confirms each has a matching implemented test (per the Test ID traceability convention
       below), and fails the build on any unmatched ID. This is a required deliverable, not optional —
       a test-plan ID with a correctly written spec but no implemented test is exactly the kind of gap
       that ships silently without this check. See "Traceability Check" below for what the script must do.
+      (The traceability check itself still runs on every PR and still verifies E2E- IDs have matching
+      *test files* — it does not execute those E2E tests. See E2E Test Trigger Model below for why.)
+
+**E2E tests (E2E-) are explicitly NOT a CI Gate item and must never run on `push` or `pull_request`.** See
+E2E Test Trigger Model immediately below.
+
+### E2E Test Trigger Model
+
+E2E/Playwright/Cypress tests are **not** part of the standard PR/merge CI pipeline. They run in a
+**separate workflow with a manual trigger only** (e.g. GitHub Actions `workflow_dispatch`, or the
+equivalent manual-run mechanism in [CI platform]):
+
+- **Why:** E2E suites are slower and inherently flakier than unit/integration tests, and they validate
+  behavior on a *deployed* environment (staging), which is a post-merge concern, not a pre-merge gate.
+  Gating every PR on E2E turns a normal merge into a bottleneck and trains engineers to ignore flaky-red
+  CI. Unit + integration + lint + traceability are enough to safely merge; E2E validates the result once
+  deployed.
+- **Trigger:** run manually by a human, or by `claude --agent agentic-sdlc:ralph-e2e` once a feature's
+  TEST issues close (see `ai-context/ralph-agent-spec.md` — Handover Model). Typical cadence is once per
+  feature-wave completion (a "wave-boundary" trigger) rather than on every commit.
+- **What this means for the CI config Ralph-impl writes:** the E2E job/workflow file must have
+  `workflow_dispatch` (or platform equivalent) as its *only* trigger — never `on: push` or
+  `on: pull_request`. If a project's CI config runs E2E automatically on every PR, that is a constitution
+  violation to be fixed, not a feature.
 
 ### Ralph Agent Testing Responsibilities
 
@@ -64,7 +87,7 @@ This section defines which Ralph agent type writes each category of tests. See `
 |-----------|-----------|------|-------------------|
 | Unit (UT-) | Ralph-impl | During implementation, same PR | All UT- IDs from test plan pass; coverage threshold met |
 | Integration (IT-) | Ralph-test | After all implementation issues in the feature are merged | All IT- IDs from test plan pass against [test environment] |
-| E2E / Smoke (ST-) | Ralph-e2e | After feature deployed to staging | All ST- IDs in test plan pass in [Playwright/Cypress] against staging |
+| E2E / Smoke (E2E-) | Ralph-e2e | After feature deployed to staging | All E2E- IDs in test plan pass in [Playwright/Cypress] against staging |
 | Regression (RT-) | CI (automated) | On every PR | No RT- regressions introduced |
 
 ### Test File Conventions
@@ -73,7 +96,7 @@ This section defines which Ralph agent type writes each category of tests. See `
 - **Integration test location:** [e.g. `tests/integration/`]
 - **E2E test location:** [e.g. `tests/e2e/` — Playwright test files]
 - **Test naming convention:** [e.g. `describe('[module]') > it('[should do X when Y]')`]
-- **Test ID traceability:** each test file includes a comment mapping it to UT-/IT-/ST- IDs from the test plan
+- **Test ID traceability:** each test file includes a comment mapping it to UT-/IT-/E2E- IDs from the test plan
 
 ### Traceability Check (required CI Gate item, not just a naming convention)
 
@@ -81,7 +104,7 @@ A written test-plan ID with no matching implemented, passing test is a defect th
 only reliable way to catch that drift is a machine check, not a reviewer remembering to look. This
 project must generate a traceability-check script or CI job that:
 
-1. Parses every `UT-`/`IT-`/`ST-` ID out of `docs/test-plan.md` (or `ai-context/test-plan.md`).
+1. Parses every `UT-`/`IT-`/`E2E-` ID out of `docs/test-plan.md` (or `ai-context/test-plan.md`).
 2. Scans the test suite for a matching ID comment per the Test ID traceability convention above.
 3. Fails the build (or produces a clearly flagged report, if advisory-only for this project) when any
    test-plan ID has no matching implemented test, or when a test file references an ID that doesn't
@@ -106,7 +129,7 @@ alongside the test plan — not an after-the-fact audit built once drift is alre
 |-------|------|--------|---------|
 | Unit | Vitest | 80% line coverage | Blocks merge |
 | Integration | Vitest + Supertest | All API endpoints covered | Blocks merge |
-| E2E | Playwright | Critical paths: login, checkout, dashboard | Advisory |
+| E2E | Playwright | Critical paths: login, checkout, dashboard | Not in PR/merge pipeline — manual `workflow_dispatch` only |
 | Regression | Vitest | All prior ACs | Blocks merge |
 
 ## What Must Be Tested
@@ -120,11 +143,15 @@ alongside the test plan — not an after-the-fact audit built once drift is alre
 - E2E: Playwright against staging deploy
 
 ## CI Gate
-Merge blocked by: unit (80% coverage) + integration + lint/typecheck
-E2E: runs post-merge on staging (advisory)
+Merge blocked by: unit (80% coverage) + integration + lint/typecheck + traceability check
+
+## E2E Test Trigger Model
+E2E is a separate GitHub Actions workflow (`e2e.yml`) triggered only by `workflow_dispatch` — never
+`push` or `pull_request`. Run manually, or via `claude --agent agentic-sdlc:ralph-e2e` once a feature's
+TEST issues close. Typical cadence: once per feature-wave, against the staging deploy.
 
 ## Ralph Agent Responsibilities
 - Ralph-impl: writes UT- tests in same PR as implementation
 - Ralph-test: writes IT- tests after feature wave is implemented; runs against docker-compose
-- Ralph-e2e: writes ST- Playwright tests after staging deploy; validates critical paths
+- Ralph-e2e: writes E2E- Playwright tests after staging deploy; validates critical paths
 ```

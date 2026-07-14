@@ -5,6 +5,28 @@
 - **System overview** — 1 paragraph, plain language, no jargon
 - **Component/service map** — ASCII diagram or table of services and their responsibilities
 - **Data ownership model** — which service owns which data; no service accesses another's store directly
+- **Bounded Contexts / Domain Map** — this project is decomposed as a set of DDD bounded contexts, each
+  identified by a short domain code (the same code used as the `DOMAIN` prefix in issue IDs, e.g. `AUTH`,
+  `BILLING`). For each domain, record:
+  | Domain Code | Bounded Context Name | Owned Entities / Tables | Owned Module / Directory Path(s) | Cross-Domain Access |
+  |---|---|---|---|---|
+  | e.g. `AUTH` | Authentication & Identity | users, sessions, refresh_tokens | `src/domains/auth/**` | Other domains call `auth`'s public API only — never its DB directly |
+
+  Rules that must hold for every domain listed:
+  - A domain owns its entities/tables exclusively — no other domain reads or writes them directly (this
+    is the same non-negotiable as the Data ownership model above, applied at sub-service granularity when
+    the system is a single service/monolith rather than separate deployable services).
+  - Cross-domain interaction happens only through the domain's declared public interface (a service
+    method, an API endpoint, or an event) — never through shared tables, shared mutable state, or reaching
+    into another domain's internal modules/files.
+  - **This map is the parallel-safety boundary for the Ralph implementation loop.** Two issues whose IDs
+    carry different domain codes are assumed to touch disjoint files/tables and are safe to implement
+    concurrently by separate sub-agents. Issues sharing a domain code are still implemented sequentially,
+    by the same sub-agent, because they may touch shared files within that domain (routers, schema
+    barrels, shared domain types). See `ai-context/ralph-agent-spec.md` — Parallelization Model.
+  - If the project is a true monolith with no meaningful domain separation, state that explicitly here
+    (e.g. "Single domain — CORE. No cross-domain boundaries; Ralph-impl runs fully sequential.") rather
+    than inventing artificial domains.
 - **Inter-service communication pattern** — REST, events, gRPC, etc. One canonical choice with exceptions noted
 - **Third-party integration contracts** — for every external system, API, or service this system depends
   on: the verified base URL(s) (including any split between hosts, e.g. a trading API vs. a market-data

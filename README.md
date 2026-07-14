@@ -101,7 +101,7 @@ Ralph agents are autonomous coding agents that pick up issues from the PMS and i
 |-------|---------|----------|---------------|
 | Ralph-impl | `claude --agent agentic-sdlc:ralph-impl` | DB, API, UI, INT issues | Any unblocked impl issue exists |
 | Ralph-test | `claude --agent agentic-sdlc:ralph-test` | TEST issues | All sibling impl issues are closed |
-| Ralph-e2e | `claude --agent agentic-sdlc:ralph-e2e` | E2E issues | All sibling TEST issues are closed |
+| Ralph-e2e | `claude --agent agentic-sdlc:ralph-e2e` | E2E issues | All sibling TEST issues are closed — **always run manually, never wired into CI** |
 
 Handover between agents is **implicit via the dependency graph** in `ai-context/issues.json` — no manual handoff needed.
 
@@ -111,6 +111,23 @@ Each agent:
 - Creates a branch, implements, writes tests, opens a PR
 - Waits for CI before merging
 - Labels issues `needs-human` or `env-issue` if it gets stuck
+
+### Ralph-impl parallelization
+
+If `/generate-project-constitution` declared multiple DDD bounded contexts (domains) in
+`ai-context/architecture.md`'s Domain Map, Ralph-impl runs as an **orchestrator**: each wave it spawns one
+domain-worker sub-agent per domain that currently has eligible issues, each in its own `git worktree`, so
+independent domains implement concurrently instead of one issue at a time. Issues within the same domain
+still run sequentially, by the same worker, to avoid intra-domain file conflicts. Concurrency is capped by
+`Max parallel domain agents` in `ai-context/ralph-agent-spec.md` (default 4). Projects with a single domain
+(or no Domain Map) fall back to the original fully-sequential loop automatically.
+
+### E2E tests are never part of the CI pipeline
+
+`ai-context/testing.md`'s CI Gate covers unit, integration, lint, and traceability only. E2E/Playwright/
+Cypress tests run in a separate workflow with a manual (`workflow_dispatch` or platform equivalent)
+trigger — never `on: push` or `on: pull_request`. Ralph-e2e is always invoked by a human or manually
+run once a feature's TEST issues close, typically once per feature-wave against staging.
 
 > **Prerequisite:** Run `/agentic-sdlc:generate-project-constitution` first. Ralph agents require `ai-context/project-constitution.md` and related files to exist.
 

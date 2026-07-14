@@ -144,6 +144,22 @@ Examples by project type:
 - Backend service: "Wiring the new endpoints into the router and connecting all middleware, auth, and service dependencies so the feature is reachable and functional"
 - CLI tool: "Registering the new command in the CLI entry point and wiring subcommands, options, and output handlers"
 
+**Q_DDD. Bounded contexts / domains** — What are this system's primary bounded contexts (the major
+capability areas that each own their own data and expose a clear interface to everything else)? Name
+3–8 domains and, for each, the entities/data it owns in one phrase.
+
+(This answer goes into `ai-context/architecture.md` as the **Bounded Contexts / Domain Map** and becomes
+the parallel-safety boundary the Ralph implementation loop uses to run independent domains concurrently —
+see `ai-context/ralph-agent-spec.md` — Parallelization Model. Domain codes named here should be short,
+uppercase abbreviations, since they double as the `DOMAIN` prefix in issue IDs generated later by
+`/feature-to-issues`, e.g. `AUTH`, `BILLING`, `CATALOG`.)
+
+Prompt with an example if the user is unsure: *"For an e-commerce platform: AUTH (users, sessions),
+CATALOG (products, inventory), ORDERS (carts, orders, payments), SHIPPING (fulfillment, tracking)."*
+
+If the system is genuinely a small, undifferentiated monolith, it's fine to answer with a single domain
+(e.g. `CORE`) — do not force artificial boundaries onto a project that doesn't have them yet.
+
 ---
 
 #### Phase 2 — Team, Compliance, and Codebase

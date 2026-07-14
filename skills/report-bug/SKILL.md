@@ -48,7 +48,7 @@ Then collect the following as free text (ask in a single follow-up message, not 
 - Environment: Where was this found? (production / staging / local / specify)
 ```
 
-If the bug was triggered by a ralph-test or ralph-e2e defect log (user pastes a `[BUG][IT-NNNN]` or `[BUG][ST-NNNN]` report), extract all fields automatically from the pasted content — do not ask questions the defect log already answers.
+If the bug was triggered by a ralph-test or ralph-e2e defect log (user pastes a `[BUG][IT-NNN]` or `[BUG][E2E-NNN]` report), extract all fields automatically from the pasted content — do not ask questions the defect log already answers.
 
 ---
 
@@ -114,7 +114,7 @@ For each identified file, check whether tests exist that should have caught this
 # Look for test files related to the affected files
 - Check __tests__/, *.test.ts, *.spec.ts adjacent to affected files
 - Check integration test directories for IT- tests covering the affected flow
-- Check E2E test files for ST- tests covering the affected user journey
+- Check E2E test files for E2E- tests covering the affected user journey
 ```
 
 Summarise the coverage gap:
@@ -123,7 +123,7 @@ Summarise the coverage gap:
 >
 > - `src/auth/google.ts` — Unit tests exist in `auth.test.ts` but do not cover the error path in Step 3
 > - No integration test covers the full OAuth callback → session creation flow
-> - ST-004 (Google sign-in E2E flow) should have caught this but may not be running against staging
+> - E2E-004 (Google sign-in E2E flow) should have caught this but may not be running against staging
 >
 > Coverage gap will be noted in the bug issue.
 
@@ -350,6 +350,6 @@ Then close the GitHub issue. Remove `needs-triage` label if still present.
 
 ## Integration with Ralph Agents
 
-When ralph-test or ralph-e2e discover defects, they already create GitHub issues in their own format (`[BUG][IT-NNNN]` / `[BUG][ST-NNNN]`). The `/report-bug` skill is the equivalent for manually reported bugs.
+When ralph-test or ralph-e2e discover defects, they already create GitHub issues in their own format (`[BUG][IT-NNN]` / `[BUG][E2E-NNN]`). The `/report-bug` skill is the equivalent for manually reported bugs.
 
 Bug issues created by `/report-bug` are **not** in `ai-context/issues.json` (they are unplanned). Ralph-impl does not pick them up automatically. The fix is always triggered explicitly: `fix bug #NNN`.

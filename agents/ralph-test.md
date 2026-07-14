@@ -80,10 +80,11 @@ Read `ai-context/issues.json` to get the dependency graph.
 **Algorithm:**
 
 1. Filter issues where `layer` is `TEST`
-2. For each, check its `blockedBy` list via `pms-map.json` + live PMS status
-3. An issue is **unblocked** if ALL `blockedBy` items are CLOSED in the PMS
-4. An issue is **eligible** if it is unblocked AND still OPEN in the PMS
-5. Sort eligible issues by numeric suffix ascending
+2. For each, read its `dependencies` array from `issues.json`. Keep only entries where `type` is `"blocking"` — `"parallel"` and `"integration"` entries never gate eligibility.
+3. For each blocking dependency, look up its PMS ID via `pms-map.json` (`items[].internal_id` → `items[].platform_id`) and query its live PMS status.
+4. An issue is **unblocked** if it has no blocking dependencies, or ALL of them are CLOSED in the PMS.
+5. An issue is **eligible** if it is unblocked AND still OPEN in the PMS.
+6. Sort eligible issues by numeric suffix ascending
 
 **Present the plan:**
 
@@ -176,10 +177,10 @@ Run the integration suite for this feature:
 
 2. **Defect logging procedure** (for implementation defects):
    Create a new issue in the PMS with:
-   - **Title:** `[BUG][IT-NNNN] [AC description] — [feature slug]`
+   - **Title:** `[BUG][IT-NNN] [AC description] — [feature slug]`
    - **Body:**
      ```
-     Test ID: IT-NNNN
+     Test ID: IT-NNN
      Feature: F-XX-slug
      AC: [acceptance criterion text]
      

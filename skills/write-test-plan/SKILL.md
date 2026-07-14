@@ -136,7 +136,7 @@ Priority    : [P1 Critical | P2 High | P3 Medium | P4 Low]
 **Example (correctly written — no implementation detail):**
 
 ```
-UT-04: Export rejected when row count exceeds limit
+UT-004: Export rejected when row count exceeds limit
 Requirement : FR-4 / AC-3
 Category    : Boundary — Negative
 Precondition: A user account exists with more than 50,000 exportable rows
@@ -150,7 +150,7 @@ Priority    : P1 Critical
 **Example (incorrectly written — do NOT do this):**
 
 ```
-UT-04: Test ExportService.validateRowCount() throws ExportLimitException
+UT-004: Test ExportService.validateRowCount() throws ExportLimitException
 ```
 That's testing implementation, not behavior.
 
@@ -201,7 +201,7 @@ The smoke test suite is the minimum set of tests that confirm the system is func
 **Format:**
 
 ```
-ST-[n]: [Test Name — the critical behavior being verified]
+E2E-[n]: [Test Name — the critical behavior being verified]
 Requirement   : FR-n / PT-n / US-XX.N
 User Journey  : [The user-visible action being confirmed]
 Precondition  : [Minimal state required — should be achievable on a fresh deployment]
@@ -300,7 +300,7 @@ Use the `AskUserQuestion` tool to interactively collect confirmation before proc
   5. Regression impact map accurately reflects feature dependencies
   6. Integration tests correctly identify real vs. stubbed dependencies
   7. An automated traceability-check script/CI job exists (or is scoped as a same-cycle deliverable)
-     and covers every UT-/IT-/ST- ID in this plan — see `ai-context/testing.md`'s CI Gate
+     and covers every UT-/IT-/E2E- ID in this plan — see `ai-context/testing.md`'s CI Gate
 
 **If all 7 items are selected:** State "✅ Test Plan Approved." Then instruct the user to run `/feature-to-issues`.
 
@@ -318,10 +318,22 @@ Next step: /feature-to-issues
 
 | Prefix | Type | Format |
 |--------|------|--------|
-| `UT-` | Unit test specification | `UT-01`, `UT-02`… |
-| `IT-` | Integration test | `IT-01`, `IT-02`… |
-| `ST-` | Smoke test | `ST-01`, `ST-02`… |
-| `RT-` | Regression test | `RT-01`, `RT-02`… |
+| `UT-` | Unit test specification | `UT-001`, `UT-002`… |
+| `IT-` | Integration test | `IT-001`, `IT-002`… |
+| `E2E-` | End-to-end / smoke test | `E2E-001`, `E2E-002`… |
+| `RT-` | Regression test | `RT-001`, `RT-002`… |
+
+Zero-padded to 3 digits, matching the `[DOMAIN]-[LAYER]-[NNN]` issue ID convention used by `/feature-to-issues`.
+
+**Note on `IT-` vs. the `INT` issue layer:** `IT-` (a *test case* ID, e.g. `IT-001`) and `INT` (an *issue
+layer*, e.g. `AUTH-INT-001`, meaning "wire this feature's DB/API/UI pieces together") are deliberately kept
+distinct — `IT-` is never renamed to `INT-` precisely so the two aren't confused. An `INT` issue is
+implemented by Ralph-impl; an `IT-` test verifies it, written by Ralph-test.
+
+**Note on `E2E-` vs. the `E2E` issue layer:** these are intentionally the same token — `E2E-001` test
+cases are written for `[DOMAIN]-E2E-NNN` issues, both owned by Ralph-e2e. (This prefix was `ST-`/"smoke
+test" in earlier versions of this convention; renamed to `E2E-` so the test-ID prefix, the issue layer,
+and the agent name all read the same way.)
 
 IDs are sequential and globally unique within this test plan. Downstream artifacts (`/feature-to-issues`, PR descriptions, code comments) must reference these IDs verbatim to maintain traceability.
 
@@ -333,7 +345,7 @@ IDs are sequential and globally unique within this test plan. Downstream artifac
 PRD
  └── FR-n ──────────────────────────────── UT-n (unit specs)
       └── AC-n ──────────────────────────── RT-n (regression)
-           └── PT-n ──────────────────── ST-n (smoke, if critical path)
+           └── PT-n ──────────────────── E2E-n (smoke, if critical path)
 
 Feature Breakdown
  └── F-XX
@@ -375,7 +387,7 @@ Test ExportController.initiateExport() returns 202 with confirmationMessage fiel
 
 **Right (behavior-driven):**
 ```
-UT-01: Authenticated user receives immediate confirmation when export is initiated
+UT-001: Authenticated user receives immediate confirmation when export is initiated
 Requirement : FR-1 / AC-1
 Category    : Happy Path
 Precondition: A user is authenticated and has at least 1 row of exportable data
