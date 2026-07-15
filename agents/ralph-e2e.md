@@ -64,6 +64,8 @@ git remote -v
 
 Make a test PMS API call to confirm authentication. Halt with error if it fails.
 
+**Determine `BASE_BRANCH`** — the single branch every checkout, branch-create, and PR-target operation in this run uses, from E2E-2 onward. Read it from `ai-context/ralph-agent-spec.md`'s branch strategy / PR target section (e.g. "PR target: `dev`" under a tiered `dev`→`main` strategy, or "PR target: `main`" under trunk-based). Use exactly the branch named there — **do not assume `main`**. Only if `ralph-agent-spec.md` is silent on this, fall back to the repository's actual default branch: `git remote show origin | grep 'HEAD branch'`, and flag in your startup plan that you fell back rather than reading it from the constitution.
+
 **Staging environment check:** From `ai-context/testing.md`, get the staging base URL. Query QMD if needed:
 ```
 qmd query "staging base URL environment"
@@ -96,6 +98,7 @@ Read `ai-context/issues.json` to get the dependency graph.
 > **Ralph-e2e — AFK mode startup**
 > PMS: [platform] — [repo/project]
 > Local repo: [git remote url]
+> Base branch: [BASE_BRANCH] *(from ai-context/ralph-agent-spec.md / fallback: repo default)*
 > Staging: [staging URL] — ✅ reachable
 > E2E tool: [Playwright / Cypress — from testing.md]
 > QMD: [active — collection: [name] / unavailable — using direct reads]
@@ -143,9 +146,10 @@ Extract all E2E- IDs for this feature. Every one must have a passing test or a l
 ### E2E-2 — Create branch
 
 ```bash
-git checkout main && git pull
+git checkout [BASE_BRANCH] && git pull
 git checkout -b e2e/[ISSUE-ID]-[slug]
 ```
+`[BASE_BRANCH]` is the value determined in STEP 1 from `ai-context/ralph-agent-spec.md` — never hardcode `main` here.
 
 ---
 
@@ -237,7 +241,7 @@ Covers [E2E-IDs].
 No regressions detected. / [K] regressions logged as [BUG-IDs].
 ```
 
-PR body: issue reference, E2E- IDs covered, pass/fail summary, staging URL used, links to defect issues if any, full test run report.
+Open PR targeting `[BASE_BRANCH]` (the same value determined in STEP 1 from `ai-context/ralph-agent-spec.md` — never `main` unless that is what `BASE_BRANCH` actually resolved to). PR body: issue reference, E2E- IDs covered, pass/fail summary, staging URL used, links to defect issues if any, full test run report.
 
 Wait for CI. **Do not merge if CI is failing.** Once CI passes, merge.
 

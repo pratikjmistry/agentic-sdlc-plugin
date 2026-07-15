@@ -81,7 +81,9 @@ Cross-check the remote URL against the `project` field in `pms-map.json`. If the
 
 Make a test call to the PMS API to confirm authentication is working (e.g. fetch the first item in `pms-map.json`). If authentication fails, halt with the error.
 
-Note the **project folder absolute path** (`pwd`) and the default branch (`git remote show origin | grep 'HEAD branch'` or the `PR target` in `ralph-agent-spec.md`) — both are needed to brief domain workers in PARALLEL MODE.
+Note the **project folder absolute path** (`pwd`).
+
+**Determine `BASE_BRANCH`** — the single branch every checkout, branch-create, worktree, and PR-target operation in this run uses, from IMPL-2 onward. Read it from `ai-context/ralph-agent-spec.md`'s branch strategy / PR target section (e.g. "PR target: `dev`" under a tiered `dev`→`main` strategy, or "PR target: `main`" under trunk-based). Use exactly the branch named there — **do not assume `main`**. Only if `ralph-agent-spec.md` is silent on this (an older or incomplete constitution), fall back to the repository's actual default branch: `git remote show origin | grep 'HEAD branch'`, and flag in your startup plan that you fell back rather than reading it from the constitution. `BASE_BRANCH` is fixed for the whole run — re-derive it only if you re-read `ai-context/ralph-agent-spec.md` after a constitution amendment mid-session.
 
 ---
 
@@ -111,6 +113,7 @@ Read `ai-context/issues.json` to get the full dependency graph.
 > **Ralph-impl — AFK mode startup**
 > PMS: [platform] — [repo/project]
 > Local repo: [git remote url]
+> Base branch: [BASE_BRANCH] *(from ai-context/ralph-agent-spec.md / fallback: repo default)*
 > QMD: [active — collection: [name] / unavailable — using direct reads]
 > Mode: **[PARALLEL — N domains eligible this wave / SEQUENTIAL — single domain or no domain map]**
 > Eligible issues found: [N] across [D] domain(s)
@@ -162,11 +165,12 @@ Extract all UT- IDs assigned to this issue from `docs/test-plan.md` — you must
 
 **In SEQUENTIAL MODE (orchestrator's own working directory):**
 ```bash
-git checkout main && git pull
+git checkout [BASE_BRANCH] && git pull
 git checkout -b feat/[ISSUE-ID]-[slug]
 ```
+`[BASE_BRANCH]` is the value determined in STEP 1 from `ai-context/ralph-agent-spec.md` — never hardcode `main` here.
 
-**In DOMAIN WORKER MODE or ISSUE WORKER MODE (inside your worktree):** never `git checkout main` locally — the primary checkout (or another worker) may already hold that branch, and a branch can only be checked out in one worktree at a time. Branch from the remote ref instead:
+**In DOMAIN WORKER MODE or ISSUE WORKER MODE (inside your worktree):** never `git checkout [BASE_BRANCH]` locally — the primary checkout (or another worker) may already hold that branch, and a branch can only be checked out in one worktree at a time. Branch from the remote ref instead:
 ```bash
 git fetch origin [BASE_BRANCH]
 git checkout -b feat/[ISSUE-ID]-[slug] origin/[BASE_BRANCH]
@@ -224,7 +228,7 @@ feat([ISSUE-ID]): [description]
 Implements [ISSUE-ID]. Covers [UT-IDs].
 ```
 
-Open PR targeting the branch in `ai-context/ralph-agent-spec.md`. PR body: issue reference, UT- IDs covered, migration notes if applicable.
+Open PR targeting `[BASE_BRANCH]` (the same value determined in STEP 1 from `ai-context/ralph-agent-spec.md` — never `main` unless that is what `BASE_BRANCH` actually resolved to). PR body: issue reference, UT- IDs covered, migration notes if applicable.
 
 Wait for CI. **Do not merge if CI is failing.** Once CI passes, merge via the PMS/platform API (this is a server-side operation and is safe to run concurrently from multiple domain workers — it does not touch your local checkout).
 
@@ -320,7 +324,7 @@ PROJECT_FOLDER: [absolute path]
 DOMAIN: [DOMAIN]
 ISSUE_IDS: [ordered list, e.g. AUTH-DB-002, AUTH-API-003]
 WORKTREE_PATH: [absolute path, e.g. PROJECT_FOLDER/../repo-name-wt-auth]
-BASE_BRANCH: [e.g. main]
+BASE_BRANCH: [value determined in STEP 1 from ai-context/ralph-agent-spec.md]
 PMS platform: [platform] — project: [repo/project]
 Max issue workers per stage: [from ai-context/ralph-agent-spec.md, default 3]
 ```
@@ -344,7 +348,7 @@ You are a **domain worker**, spawned by another Ralph-impl instance for exactly 
 - `DOMAIN` — the single domain code you own for this run (e.g. `AUTH`)
 - `ISSUE_IDS` — the ordered list of eligible issue IDs in this domain for this wave (already sorted DB → API → UI → INT)
 - `WORKTREE_PATH` — an isolated git worktree you must do ALL your own work in
-- `BASE_BRANCH` — the branch to build from (usually `main`)
+- `BASE_BRANCH` — the branch to build from, as determined by the orchestrator in STEP 1 from `ai-context/ralph-agent-spec.md` (not necessarily `main` — trust the value passed in your prompt, don't assume)
 - PMS platform + project identifier
 - `Max issue workers per stage` — concurrency cap for the nested tier below
 
@@ -386,7 +390,7 @@ For each stage, in order:
     PROJECT_FOLDER: [absolute path]
     ISSUE_ID: [e.g. AUTH-DB-002]
     WORKTREE_PATH: [absolute path, sibling to your own — e.g. PROJECT_FOLDER/../repo-name-wt-auth-db-002]
-    BASE_BRANCH: [e.g. main]
+    BASE_BRANCH: [value determined in STEP 1 from ai-context/ralph-agent-spec.md]
     PMS platform: [platform] — project: [repo/project]
     ```
   - Wait for every issue worker in this batch to report before moving to the next batch or stage.
@@ -417,7 +421,7 @@ You are an **issue worker**, spawned by a domain worker to implement exactly one
 - `PROJECT_FOLDER` — absolute path to the main project checkout
 - `ISSUE_ID` — the single issue you own for this run
 - `WORKTREE_PATH` — an isolated git worktree, sibling to your parent domain worker's worktree, that you must do ALL work in
-- `BASE_BRANCH` — the branch to build from (usually `main`)
+- `BASE_BRANCH` — the branch to build from, as determined by the orchestrator in STEP 1 from `ai-context/ralph-agent-spec.md` (not necessarily `main` — trust the value passed in your prompt, don't assume)
 - PMS platform + project identifier
 
 Never touch files outside `WORKTREE_PATH`, and never operate on any issue other than `ISSUE_ID`.

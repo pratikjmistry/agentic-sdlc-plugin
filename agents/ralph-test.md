@@ -62,6 +62,8 @@ git remote -v
 
 Make a test PMS API call to confirm authentication. Halt with error if it fails.
 
+**Determine `BASE_BRANCH`** — the single branch every checkout, branch-create, and PR-target operation in this run uses, from TEST-2 onward. Read it from `ai-context/ralph-agent-spec.md`'s branch strategy / PR target section (e.g. "PR target: `dev`" under a tiered `dev`→`main` strategy, or "PR target: `main`" under trunk-based). Use exactly the branch named there — **do not assume `main`**. Only if `ralph-agent-spec.md` is silent on this, fall back to the repository's actual default branch: `git remote show origin | grep 'HEAD branch'`, and flag in your startup plan that you fell back rather than reading it from the constitution.
+
 **Test environment check:** From `ai-context/testing.md`, identify the test environment (docker-compose, shared dev, ephemeral). Verify it is reachable:
 ```bash
 # Adapt to what testing.md specifies, e.g.:
@@ -91,6 +93,7 @@ Read `ai-context/issues.json` to get the dependency graph.
 > **Ralph-test — AFK mode startup**
 > PMS: [platform] — [repo/project]
 > Local repo: [git remote url]
+> Base branch: [BASE_BRANCH] *(from ai-context/ralph-agent-spec.md / fallback: repo default)*
 > Test environment: [url/type] — ✅ reachable
 > QMD: [active — collection: [name] / unavailable — using direct reads]
 > Eligible TEST issues: [N]
@@ -137,9 +140,10 @@ Extract all IT- IDs for this feature from `docs/test-plan.md`. Every one must ha
 ### TEST-2 — Create branch
 
 ```bash
-git checkout main && git pull
+git checkout [BASE_BRANCH] && git pull
 git checkout -b test/[ISSUE-ID]-[slug]
 ```
+`[BASE_BRANCH]` is the value determined in STEP 1 from `ai-context/ralph-agent-spec.md` — never hardcode `main` here.
 
 ---
 
@@ -213,7 +217,7 @@ Covers [IT-IDs].
 [N] passing, [M] blocked by logged defects.
 ```
 
-PR body: issue reference, IT- IDs covered, pass/fail summary, links to any defect issues opened, test environment used.
+Open PR targeting `[BASE_BRANCH]` (the same value determined in STEP 1 from `ai-context/ralph-agent-spec.md` — never `main` unless that is what `BASE_BRANCH` actually resolved to). PR body: issue reference, IT- IDs covered, pass/fail summary, links to any defect issues opened, test environment used.
 
 Wait for CI. **Do not merge if CI is failing.** Once CI passes, merge.
 
