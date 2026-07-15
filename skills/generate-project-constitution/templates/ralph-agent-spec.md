@@ -45,6 +45,24 @@ retries — not a sign the model is unsafe. See `agents/ralph-impl.md` — FAILU
 | Worktree path convention | [e.g. domain worker: `../[repo-name]-wt-[domain-lowercase]`; issue worker: `../[repo-name]-wt-[domain-lowercase]-[issue-suffix-lowercase]`, sibling to its parent domain worker's worktree — both cleaned up by their owner after use] |
 | Cross-domain / cross-issue merge coordination | Workers at both tiers never hold a local checkout of the base branch — they branch each issue's feature branch directly off `origin/[base branch]` and merge via the PMS/platform API (server-side, safe to run concurrently). Feature-completion checks (INT verification, TEST-unblock signalling) run once centrally in the orchestrator after each wave, never inside a domain or issue worker, to avoid racing to post the same signal. |
 
+### Promotion Model (only if a tiered branch strategy is used — see `ai-context/repo-structure.md`)
+
+Defines how code moves from the shared integration branch into `main`, once Ralph-impl, Ralph-test, and
+Ralph-e2e have merged their PRs into the integration branch. This is a **separate step from every Ralph
+agent's Output Contract below** — none of Ralph-impl, Ralph-test, or Ralph-e2e ever merge to `main`
+directly; their PR target is always the integration branch (see Agent Configuration table below).
+
+| Setting | Value |
+|---------|-------|
+| Integration branch | [e.g. `dev`] |
+| Promotion trigger | [e.g. "Once every issue in a wave is merged to `dev` and Ralph-e2e's E2E issues for that wave are closed" — see Q25b] |
+| Promotion owner | [e.g. "Opened as a PR from `dev` to `main` by [a human / a scheduled CI job], reviewed the same as any other PR per `ai-context/repo-structure.md`"] |
+| Promotion CI gate | [e.g. "Unit + integration + regression + E2E smoke — see `ai-context/testing.md` Main Promotion Gate"] |
+| Promotion failure handling | [e.g. "If the promotion PR's E2E smoke suite fails, promotion is blocked; the regressing commit is identified via `git bisect` (or equivalent) against the wave's merged PRs. The wave is not complete until promotion to `main` succeeds — a merged-to-integration-branch wave with a failed promotion is not 'done'."] |
+
+If this project does **not** use a tiered branch strategy, delete this section — every agent's PR target
+is `main` directly and there is no separate promotion step.
+
 ### Handover Model
 
 The handover between agent types is **implicit via the dependency graph** in `ai-context/issues.json`. No explicit handoff message is required.
@@ -64,6 +82,7 @@ For each agent type, define what it must read before starting work:
 - `ai-context/architecture.md` — service boundaries, no cross-service data access
 - `ai-context/coding-standards.md` — language conventions, naming, review checklist
 - `ai-context/testing.md` — unit test framework, file conventions, coverage threshold
+- `ai-context/repo-structure.md` — branch/PR conventions, PR target (see Promotion Model above if tiered)
 - `ai-context/database-guidelines.md` — naming, ID strategy, migration tooling (for DB issues)
 - The feature file `docs/features/F-XX-slug.md` — acceptance criteria and entity ownership
 
@@ -108,7 +127,11 @@ What each agent type must produce:
 | Tools allowed | Read, Write, Edit, Bash, Git | Read, Write, Edit, Bash, Git | Read, Write, Edit, Bash, Git, Browser |
 | Max turns per issue | [e.g. 50] | [e.g. 30] | [e.g. 40] |
 | Branch strategy | `feat/[ISSUE-ID]-[slug]` | `test/[ISSUE-ID]-[slug]` | `e2e/[ISSUE-ID]-[slug]` |
-| PR target | `main` / `develop` | `main` / `develop` | `main` / `develop` |
+| PR target | [`main`, or the integration branch name if tiered — e.g. `dev`] | [same] | [same] |
+
+If this project uses a tiered branch strategy, all three agents' PR target is the integration branch,
+**never** `main` directly — promotion from the integration branch to `main` is a separate step owned
+outside any single agent's PR; see Promotion Model above.
 
 ### Failure Handling
 
@@ -117,9 +140,13 @@ What each agent type must produce:
 - If Ralph-e2e finds a failing E2E- test that was previously passing: open a bug issue with reproduction steps, block the E2E issue from closing.
 - All agents: never force-push, never merge without CI passing, never skip a failing test.
 - Ralph-impl (and any human editing CI config): never wire an E2E/Playwright/Cypress job into the CI
-  pipeline's `on: push` / `on: pull_request` triggers. E2E runs only via a separate, manually-triggered
-  workflow (`workflow_dispatch` or platform equivalent) — see `ai-context/testing.md` — E2E Test Trigger
-  Model. Ralph-e2e itself is always invoked manually, never spawned by CI.
+  pipeline's `on: push` / `on: pull_request` triggers for PRs into the integration branch (or `main`, on a
+  single-base-branch project). E2E runs only via a separate, manually-triggered workflow
+  (`workflow_dispatch` or platform equivalent) by default — see `ai-context/testing.md` — E2E Test Trigger
+  Model. **Exception:** on a project with a tiered branch strategy whose Promotion CI gate (above)
+  requires E2E smoke, the one promotion PR per wave (integration branch → `main`) may trigger E2E via
+  `on: pull_request` scoped to `base: main` — this is the specific gate the project chose, not a drift
+  back to per-PR E2E. Ralph-e2e itself is always invoked manually, never spawned by CI, in either case.
 
 ## Example Structure
 

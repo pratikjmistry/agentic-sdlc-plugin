@@ -44,21 +44,46 @@ Defines the testing strategy, tooling, coverage requirements, and agent responsi
 
 ### CI Gate
 
-Which test types block merge, on every PR / push to the default branch:
+**If this project uses a single base branch** (trunk-based, Gitflow, or environment-branches strategy —
+see `ai-context/repo-structure.md`), use one gate list for every PR / push to the default branch:
 - [ ] Unit tests — [threshold]% coverage
 - [ ] Integration tests — all mapped IT- IDs pass
 - [ ] Linting and type-check
 - [ ] Regression suite — no RT- regressions
-- [ ] **Traceability check** — an automated script/CI job parses every UT-/IT-/E2E- ID out of the test
-      plan, confirms each has a matching implemented test (per the Test ID traceability convention
-      below), and fails the build on any unmatched ID. This is a required deliverable, not optional —
-      a test-plan ID with a correctly written spec but no implemented test is exactly the kind of gap
-      that ships silently without this check. See "Traceability Check" below for what the script must do.
-      (The traceability check itself still runs on every PR and still verifies E2E- IDs have matching
-      *test files* — it does not execute those E2E tests. See E2E Test Trigger Model below for why.)
+- [ ] Traceability check — see "What the Traceability Check Verifies" below
 
-**E2E tests (E2E-) are explicitly NOT a CI Gate item and must never run on `push` or `pull_request`.** See
-E2E Test Trigger Model immediately below.
+**E2E tests (E2E-) are explicitly NOT a CI Gate item on a single-base-branch project and must never run on
+`push` or `pull_request`.** See E2E Test Trigger Model immediately below.
+
+**If this project uses a tiered branch strategy** (a shared integration branch promoted to `main` — see
+`ai-context/repo-structure.md`), replace the single list above with one gate list per tier. Every PR into
+the integration branch and the promotion PR from the integration branch into `main` are different events
+with potentially different required checks — state both explicitly, don't assume they're the same:
+
+**Integration branch gate** (every PR into `[integration branch name]`):
+- [ ] Unit tests — [threshold]% coverage
+- [ ] Integration tests — all mapped IT- IDs pass
+- [ ] Linting and type-check
+- [ ] Regression suite — no RT- regressions
+- [ ] Traceability check — see "What the Traceability Check Verifies" below
+
+**Main promotion gate** (the one PR per wave from `[integration branch name]` into `main`):
+- [ ] Everything in the integration branch gate, plus:
+- [ ] E2E / smoke tests — all applicable E2E- IDs pass against [environment]
+- [ ] Any additional pre-release checks: [e.g. changelog updated, version bumped]
+
+This is a deliberate, project-specific exception to the "E2E never blocks a merge" default in E2E Test
+Trigger Model below — here E2E blocks exactly one PR per wave (the promotion PR), not every feature PR.
+
+#### What the Traceability Check Verifies
+
+An automated script/CI job parses every UT-/IT-/E2E- ID out of the test plan, confirms each has a matching
+implemented test (per the Test ID traceability convention below), and fails the build on any unmatched ID.
+This is a required deliverable, not optional — a test-plan ID with a correctly written spec but no
+implemented test is exactly the kind of gap that ships silently without this check. See "Traceability
+Check" below for what the script must do. (The traceability check itself still runs on every PR — including
+every PR into the integration branch, on a tiered project — and still verifies E2E- IDs have matching
+*test files*; it does not execute those E2E tests. See E2E Test Trigger Model below for why.)
 
 ### E2E Test Trigger Model
 
@@ -76,8 +101,14 @@ equivalent manual-run mechanism in [CI platform]):
   feature-wave completion (a "wave-boundary" trigger) rather than on every commit.
 - **What this means for the CI config Ralph-impl writes:** the E2E job/workflow file must have
   `workflow_dispatch` (or platform equivalent) as its *only* trigger — never `on: push` or
-  `on: pull_request`. If a project's CI config runs E2E automatically on every PR, that is a constitution
-  violation to be fixed, not a feature.
+  `on: pull_request`, for PRs into the integration branch (or `main`, on a single-base-branch project). If
+  a project's CI config runs E2E automatically on every feature PR, that is a constitution violation to be
+  fixed, not a feature.
+- **Tiered-branch exception:** on a project with a tiered branch strategy whose Main Promotion Gate above
+  requires E2E smoke, the promotion PR (integration branch → `main`) *may* have `on: pull_request` scoped
+  to `base: main` trigger the E2E job — that is still not "every PR," only the one promotion PR per wave,
+  and it is the specific gate this project chose in Q25c, not a silent drift back to per-PR E2E. Ralph-e2e
+  itself is still always invoked manually in both cases, never spawned automatically by CI.
 
 ### Ralph Agent Testing Responsibilities
 

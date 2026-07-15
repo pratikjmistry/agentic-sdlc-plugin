@@ -10,6 +10,10 @@ description: >
   "we approved the PRD, now set up the project standards",
   "before we break into features, let's define our conventions",
   or any request to establish project-level engineering standards before development begins.
+  Also trigger when a constitution already exists and the user wants to change it: "amend the
+  constitution", "update the project constitution", "change our branch strategy", "add a promotion
+  gate", "update ralph-agent-spec", "change our CI gates" — this skill handles both first-time
+  generation and scoped amendment of an existing ai-context/ set (see Step 0.5).
   Step 2.5 of the Greenfield workflow: /grill → /write-prd → [/generate-project-constitution]
   → /prd-to-features → HITL Feature Review → /feature-to-issues → Ready to Develop.
 ---
@@ -87,6 +91,41 @@ If an approved PRD is provided, read it silently and extract:
 - Compliance or security signals
 
 Use this to pre-fill sensible defaults and skip obvious questions. Do not ask what the PRD already tells you.
+
+---
+
+### Step 0.5 — Amend or Generate?
+
+Check whether `ai-context/project-constitution.md` already exists in the project folder.
+
+**If it does not exist:** this is a first-time generation. Continue to Step 1 as written below.
+
+**If it already exists:** this is an **amendment**, not a first generation. Do not re-run the full interview
+or regenerate every file — that would blow away decisions the project already made deliberately. Instead:
+
+1. Read the existing `ai-context/project-constitution.md` in full, especially its **Amendment History**
+   table and **Decision Authority** section — later steps must follow the same authority/approval process
+   already established there, and the new entry must continue the same version-numbering scheme.
+2. Ask the user (free text, or `AskUserQuestion` with these as options if it helps): which area is
+   changing? e.g. "Branch/CI strategy", "Tech stack", "Security model", "Testing strategy",
+   "Architecture / domains", "Other (describe)". Multiple areas may apply.
+3. Run **only** the Phase 1–5 interview questions relevant to the stated area(s) — skip every unrelated
+   question. (Example: a branch/CI strategy change only needs Q25, Q25a–c, and Q26; it does not need Q9
+   through Q24.)
+4. Identify which constitution files are actually affected by the answers (usually 1–3 files, e.g.
+   `repo-structure.md`, `testing.md`, `ralph-agent-spec.md` for a branch/CI change). Re-generate **only**
+   those files, using the same per-file agent-spawn approach as Step 3 Phase 2 — every other existing file
+   is left untouched.
+5. Update `ai-context/project-constitution.md` by hand (parent context, not a spawned agent, since this is
+   a small targeted edit): append one new row to the Amendment History table with the next version number,
+   today's date, the decision-maker, and a one-line summary of what changed *and what didn't* (mirror the
+   existing entries' phrasing, e.g. "No changes to Immutable Principles or Decision Authority."). Do not
+   touch Immutable Principles or Decision Authority unless the user explicitly says this amendment changes
+   them.
+6. Run the same HITL checkpoint pattern as Step 4, scoped only to the items that actually changed.
+
+Skip Step 2's full file-recommendation menu in amend mode — recommend only the specific files identified in
+sub-step 4 above and confirm those before generating.
 
 ---
 
@@ -250,6 +289,9 @@ Ask these regardless of whether the PRD mentions technology. Specific versions a
 
 **Q16. CI test gate** — Which test types must pass before a PR can be merged?
 (Multiselect — Unit tests, Integration tests, E2E tests, Linting/type-check, Coverage threshold)
+(Q25 in Phase 4, asked later, may reveal a tiered branch strategy. If it does, Q25c's per-tier gate matrix
+supersedes this answer — don't write a single-gate `testing.md` CI Gate section in that case, use the
+per-tier form instead. It's fine to answer Q16 now and revise once Q25 is answered.)
 
 **Q17. Test environment strategy** — Where do integration tests run?
 - Local docker-compose (no external deps)
@@ -332,16 +374,41 @@ Ask only the questions relevant to this project based on Phase 1–3 answers. Sk
 **Q24. Secrets management** — Where do secrets and config live?
 (Free text — or offer: AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault, Kubernetes Secrets, environment variables in CI, not yet decided)
 
-**If team > 5 OR monorepo OR polyrepo:**
+**If team > 5 OR monorepo OR polyrepo OR using the Ralph agentic coding loop** (branch/PR conventions are
+always needed to populate `ai-context/ralph-agent-spec.md`'s PR target, regardless of team size — don't
+skip this just because the team is solo):
 
 **Q25. Branch strategy** — What is the branching and release model?
 - Trunk-based development (short-lived feature branches → main)
 - Gitflow (feature → develop → release → main)
 - Environment branches (main → staging → production)
+- Tiered integration branch (feature branches → one shared integration branch → main, promoted as a gate)
 - Not yet decided
 
+**If "Tiered integration branch" is selected, ask these three follow-ups before moving on — they replace
+Q16's single CI-gate list for this project:**
+
+**Q25a. Integration branch name** — What is the shared integration branch called?
+(Free text — e.g. `dev`, `develop`, `integration`. This is the branch Ralph-impl, Ralph-test, and
+Ralph-e2e open PRs against — never `main` directly.)
+
+**Q25b. Promotion trigger** — What triggers a merge from the integration branch into `main`?
+- Wave/feature completion (recommended for the Ralph loop — promote once a wave's issues are all merged
+  and closed)
+- Fixed release schedule (e.g. a weekly release train)
+- Manual only, no fixed trigger
+- Every merge to the integration branch auto-promotes (effectively no separate gate)
+
+**Q25c. Per-tier CI gate matrix** — Which test types must pass at each tier, and which block what?
+(Free text — e.g. "Integration branch: unit + integration + regression, blocks every PR into it. Main:
+unit + integration + regression + E2E smoke, blocks the promotion PR." This answer produces a **per-tier**
+CI Gate table in `ai-context/testing.md` — one table per branch tier — instead of the single default
+table, plus the Promotion Model section of `ai-context/ralph-agent-spec.md`.)
+
 **Q26. PR and review standards** — What are the review requirements?
-(Free text — prompt for: minimum reviewers, who can approve, what triggers auto-checks)
+(Free text — prompt for: minimum reviewers, who can approve, what triggers auto-checks. If a tiered
+branch strategy was chosen, also confirm whether the promotion PR from the integration branch to `main`
+has different review requirements than a feature PR into the integration branch.)
 
 ---
 

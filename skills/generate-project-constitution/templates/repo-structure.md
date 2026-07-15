@@ -16,4 +16,9 @@
   any shared/core domain that is exempt (e.g. a `shared` or `core` module all domains may import from).
 - **Shared library strategy** — where shared code lives; how it's versioned and consumed
 - **Generated code location** — where generated files (types, clients, migrations) live; whether they're committed
-- **Branch naming and PR conventions** — format for branch names, PR title format, required labels
+- **Branch naming and PR conventions** — format for branch names, PR title format, required labels. If a
+  **tiered branch strategy** is in use (a shared integration branch sits between feature branches and
+  `main`), state explicitly: the integration branch name, that no feature branch or Ralph agent PR ever
+  targets `main` directly, and what triggers promotion from the integration branch to `main`. This section
+  states the *policy*; the mechanics (who/what opens the promotion PR, what gate it must pass) belong in
+  `ai-context/ralph-agent-spec.md` — Promotion Model, cross-referenced from here rather than repeated.
