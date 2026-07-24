@@ -247,6 +247,27 @@ mockups:
   interactive elements, sufficient color contrast for the chosen palette, and a logical heading/landmark
   structure. This is not optional polish — it's the same baseline the real implementation must meet, and
   a mockup that ignores it teaches the wrong pattern.
+- **Wire real cross-screen navigation.** Every link implied by the Navigation/IA Map or a screen's
+  relationship to another screen (a card that opens a detail view, a nav item, a tab) must be a real
+  relative `href` to the target screen's mockup file — not a visual-only element. A reviewer must be
+  able to click through the actual mockups the way a user would move through the product, not just read
+  about the flow in `ui-design.md`.
+- **Wire each screen's Primary Actions to reveal their target state**, not just render a static button.
+  If a Primary Action opens a modal/dialog, switches a tab, or toggles a collapsed/expanded state,
+  add the minimum inline JS/CSS needed to make that state visibly appear on click (e.g. toggling a
+  class or `hidden` attribute). This is scoped strictly to **revealing the state** — never implement
+  real form submission, validation, or data persistence in a mockup; that is Ralph-impl's job, not
+  this skill's. A "Create Task" modal that opens and shows its field layout is sufficient; the modal's
+  own submit button does not need to do anything.
+- **When a Primary Action's real mechanism is itself an implementation decision** (e.g. drag-and-drop
+  reordering vs. a context menu vs. per-item move buttons), do not attempt to replicate the final
+  interaction mechanism — that is genuine interaction engineering (pointer/touch/keyboard support, drop
+  targets, accessible reordering) belonging to Ralph-impl and the project's real framework, not a static
+  mockup. Instead, demonstrate the **resulting state change** through the cheapest faithful interaction
+  available (e.g. a small "Move to ▸" control that relocates the item on click). The mockup's job is to
+  prove the capability and its result are real, not to pick or build the final interaction pattern.
+- If theming was set to "Both, with a toggle" in Step 1, the toggle must actually switch themes on
+  click — not just be present as a styled button.
 
 Save each screen mockup to `docs/design/mockups/[SCR-NNN]-[slug].html`.
 
@@ -339,33 +360,39 @@ Skipped from mockup pass (structural inventory only): [SCR-IDs, or "None"]
 ### Step 7 — HITL UI Design Review Checkpoint
 
 Use the `AskUserQuestion` tool. `AskUserQuestion` hard-caps at **4 options per question** — this
-checklist has 8 items, so it must be split into **two sequential `multiSelect: true` calls**, not one.
-Aggregate the selections from both calls before evaluating. If a call returns the literal string
+checklist has 9 items, so it must be split into **three sequential `multiSelect: true` calls**, not one.
+Aggregate the selections from all three calls before evaluating. If a call returns the literal string
 `"[No preference]"`, treat that as zero items selected for that call — not an error, and not a reason
 to skip the check.
 
-**Call 1 of 2 — `AskUserQuestion` with:**
-- question: "UI Design Review (1/2) — confirm the items that are complete:"
+**Call 1 of 3 — `AskUserQuestion` with:**
+- question: "UI Design Review (1/3) — confirm the items that are complete:"
 - multiSelect: true
 - options:
   1. Screen inventory covers every User Story's needed views
   2. Navigation/IA map matches the expected user flows
   3. Selected layout pattern (including any merge) is approved
-  4. Color palette, typography, and iconography match brand expectations
 
-**Call 2 of 2 — `AskUserQuestion` with:**
-- question: "UI Design Review (2/2) — confirm the items that are complete:"
+**Call 2 of 3 — `AskUserQuestion` with:**
+- question: "UI Design Review (2/3) — confirm the items that are complete:"
 - multiSelect: true
 - options:
+  4. Color palette, typography, and iconography match brand expectations
   5. Mockups accurately reflect the approved layout and style
   6. Component inventory has no obvious missing shared components
+
+**Call 3 of 3 — `AskUserQuestion` with:**
+- question: "UI Design Review (3/3) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   7. Theming choice (light/dark/both) is correctly reflected
   8. Mockups are consistent with `ai-context/design-system.md` where one exists (component library, tokens, accessibility baseline) — or its absence is confirmed and this was a from-scratch pass
+  9. Screens are genuinely click-through: every Navigation/IA Map link and every screen's Primary Actions are wired, not just visually present
 
-**If all 8 items are selected across both calls:** State "✅ UI Design Approved." Then instruct the user to run
+**If all 9 items are selected across all three calls:** State "✅ UI Design Approved." Then instruct the user to run
 `/feature-to-issues`.
 
-**If any items are NOT selected:** List each unconfirmed item (from either call), state "⛔ UI Design requires revision —
+**If any items are NOT selected:** List each unconfirmed item (from any call), state "⛔ UI Design requires revision —
 do not proceed until all items are confirmed.", and halt.
 
 > This is the mandatory HITL gate between UI design and issue generation. Agents assist. Humans approve.
@@ -404,6 +431,15 @@ Zero-padded to 3 digits, globally unique within this design document. Downstream
 - Derive a screen from anything other than a User Story's Acceptance or Behavioral Expectations — a
   screen with no traceable story is scope creep; flag it instead of quietly including it.
 - Silently interpret an ambiguous "merge these layouts" request — restate and confirm first.
+- Leave a screen's Primary Action inert (no visible response to a click) when Step 2 identified it as
+  a Primary Action for that screen — a reviewer who can't click it can't confirm it's right.
+- Leave a Navigation/IA Map relationship as a visual-only element — if the map says one screen leads to
+  another, the mockup must actually link there.
+- Implement real form submission, validation, or data persistence in a mockup to make an action "work" —
+  that oversteps into Ralph-impl's job; reveal the state, don't build the feature.
+- Hand-build a Primary Action's final interaction mechanism (drag-and-drop, gesture handling, complex
+  reordering) when a cheaper interaction can demonstrate the same resulting state — that is also
+  overstepping into Ralph-impl's job, just for interaction engineering instead of backend logic.
 
 ### ALWAYS
 - Load `ai-context/design-system.md` in Step 0 if it exists, and treat it as authoritative.
@@ -411,6 +447,8 @@ Zero-padded to 3 digits, globally unique within this design document. Downstream
   already answers.
 - Trace every screen to at least one Feature ID and User Story ID.
 - Cap the styled-mockup pass at 8 screens and explicitly list what was skipped.
+- Wire every screen-to-screen link and every Primary Action's state-reveal (modal, tab, toggle) so the
+  mockups are genuinely click-through, not just individually accurate.
 - Save both `docs/design/ui-design.md` and `ai-context/ui-design.md`.
 - End every run with the HITL UI Design Review Checkpoint.
 
