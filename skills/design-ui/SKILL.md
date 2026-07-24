@@ -31,8 +31,10 @@ GREENFIELD:
 **Input:** Approved Feature Breakdown (`docs/features/*.md` — screens are derived from User Stories and
 their Acceptance/Behavioral Expectations) + `ai-context/test-plan.md` (informational only — critical
 user journeys hint at which screens matter most; never dictates a visual or structural decision) +
-`ai-context/project-constitution.md` / `ai-context/tech-stack.md` (frontend framework, existing design
-tokens) + a scan of the connected project folder for an existing design system.
+`ai-context/project-constitution.md` / `ai-context/tech-stack.md` (frontend framework) +
+`ai-context/design-system.md` if present (component library, design tokens, responsive strategy,
+accessibility baseline — **authoritative** when it exists, see Step 0) + a scan of the connected project
+folder for corroborating evidence of an existing design system.
 
 **Output:** `docs/design/ui-design.md` (screen inventory, component inventory, navigation map, captured
 design preferences) + `docs/design/mockups/*.html` (rendered HTML/CSS mockups) + an identical copy at
@@ -89,36 +91,59 @@ Load, in order:
    framework/library (React, Vue, etc.) so mockups can later be described in terms the implementer
    will recognize.
 4. `ai-context/coding-standards.md` — note any stated component or naming conventions.
+5. `ai-context/design-system.md` — if present, extract: component library (name/version or "custom" +
+   location), design token structure (color/spacing/typography — and their actual values if the file
+   states them, not just where they live), responsive strategy, accessibility baseline (WCAG level,
+   keyboard nav, screen reader expectations), new-component-creation process, and the named enforcement
+   mechanism. **This file, when it exists, is the authoritative source for these decisions** — it came
+   out of the project constitution interview, a deliberate human-reviewed process, not a guess. Treat it
+   as settled fact, not a starting suggestion.
 
-Note any missing optional file (2–4) and proceed; only file 1 blocks.
+Note any missing optional file (2–5) and proceed; only file 1 blocks.
 
-**Then scan the project folder** for evidence of an existing design system: Tailwind/CSS config files,
-`:root` CSS custom properties, an existing component library directory (e.g. `components/ui`,
-`src/design-system`), Storybook config, existing brand assets (logo, favicon, manifest colors). Record
-what is found — this pre-fills Step 1 and avoids re-asking for decisions the project already made.
+**Then scan the project folder** for corroborating evidence: Tailwind/CSS config files, `:root` CSS
+custom properties, an existing component library directory (e.g. `components/ui`, `src/design-system`),
+Storybook config, existing brand assets (logo, favicon, manifest colors). Record what is found — this
+pre-fills Step 1 and avoids re-asking for decisions the project already made.
+
+**If `design-system.md` exists and the codebase scan disagrees with it** (e.g. it names a component
+library the codebase doesn't actually import, or token values that don't match what's in the CSS),
+flag the discrepancy to the user in Step 1a rather than silently picking one side — `design-system.md`
+may be stale, or the scan may be looking in the wrong place; only the user can say which.
 
 ---
 
 ### Step 1 — Design Preference Elicitation
 
-**1a — Report scan findings first.** State plainly what was found (e.g. "Found a Tailwind config with
-`primary: #1E40AF` and an existing `components/ui` library using shadcn/ui conventions") or "No existing
-design system detected — this will be a from-scratch style pass."
+**1a — Report `design-system.md` and scan findings first, before asking anything.** State plainly what
+was found, distinguishing the two sources:
+- From `ai-context/design-system.md` (authoritative, if present): e.g. "The project constitution
+  defines a component library (shadcn/ui), a token structure for color/spacing/typography, WCAG 2.1 AA
+  as the accessibility baseline, and axe-core as the enforcement check."
+- From the codebase scan (corroborating, always run): e.g. "Found a Tailwind config with
+  `primary: #1E40AF` and an existing `components/ui` directory matching the declared library."
+- Or: "No `design-system.md` and no existing design system detected — this will be a from-scratch pass."
 
-**1b — Ask only for what scan evidence didn't already answer.** Use `AskUserQuestion` (max 4 questions
-per call — split across two calls if needed). Skip any question fully answered by the scan; state what
-you're skipping and why.
+**1b — Ask only for what neither source already answered.** Use `AskUserQuestion` (max 4 questions per
+call — split across two calls if needed). Skip any question `design-system.md` or the scan already
+answers; state what you're skipping and why. If `design-system.md` gives structure but not concrete
+values (e.g. "tokens live in `tokens.css`" without stating the actual palette), still skip asking for
+new values — read the file it points to instead of asking the user to restate it.
 
-1. **Brand color(s)** — free text (hex values, or "use the existing tokens found above")
-2. **Typography** — free text (existing tokens, a named font, or "use system font stack")
+1. **Brand color(s)** — free text (hex values), unless already resolved above
+2. **Typography** — free text (a named font, or "use system font stack"), unless already resolved above
 3. **Iconography** — options: *Use existing icon set found* / *Lucide* / *Heroicons* / *Phosphor* /
-   *Other (describe)*
+   *Other (describe)* — unless `design-system.md` already names one
 4. **Layout leaning** (a starting bias, not a final answer — Step 3 still generates real options) —
    options: *Sidebar-first* / *Top-nav* / *Command-palette-first* / *No preference, show me options*
 5. **Theming** — options: *Light only* / *Dark only* / *Both, with a toggle* / *Not sure yet*
 6. **Reference anchor** — free text: "Should this feel like a specific product you already know?
    (e.g. Linear, Stripe, Notion, or your own product)" — this single question often resolves more
    ambiguity than several narrow style questions combined.
+7. **Accessibility baseline** — options: *WCAG 2.1 AA* / *WCAG 2.1 AAA* / *No specific requirement* /
+   *Not sure* — **skip this question whenever `design-system.md` already states a baseline; use that
+   value instead.** Never let the mockup pass silently default to no accessibility standard just
+   because the question was skippable.
 
 Do not proceed to Step 2 until every question has an answer or an explicit skip-with-reason.
 
@@ -217,6 +242,11 @@ mockups:
 - For any preference left unspecified in Step 1, use design judgment for non-brand-critical choices
   (spacing, minor layout polish) but **never invent a brand-critical decision** (primary color, tone) —
   loop back to a targeted `AskUserQuestion` instead.
+- **Honor the accessibility baseline** captured in Step 1 (from `design-system.md` or the elicitation
+  question) in every mockup: semantic HTML elements (not `<div>` soup), visible focus states on
+  interactive elements, sufficient color contrast for the chosen palette, and a logical heading/landmark
+  structure. This is not optional polish — it's the same baseline the real implementation must meet, and
+  a mockup that ignores it teaches the wrong pattern.
 
 Save each screen mockup to `docs/design/mockups/[SCR-NNN]-[slug].html`.
 
@@ -237,10 +267,12 @@ Compose `docs/design/ui-design.md`:
 
 | | |
 |---|---|
+| **Design system source** | [`ai-context/design-system.md` (authoritative) / codebase scan only / from-scratch — no existing system found] |
 | **Color palette** | [captured values or token reference] |
 | **Typography** | [captured value] |
 | **Iconography** | [captured choice] |
 | **Theming** | [Light / Dark / Both] |
+| **Accessibility baseline** | [WCAG level + source — design-system.md or elicited] |
 | **Reference anchor** | [product named, or "None given"] |
 | **Selected layout pattern** | [Concept name/merge description from Step 4] |
 
@@ -320,8 +352,9 @@ single interaction.
   5. Mockups accurately reflect the approved layout and style
   6. Component inventory has no obvious missing shared components
   7. Theming choice (light/dark/both) is correctly reflected
+  8. Mockups are consistent with `ai-context/design-system.md` where one exists (component library, tokens, accessibility baseline) — or its absence is confirmed and this was a from-scratch pass
 
-**If all 7 items are selected:** State "✅ UI Design Approved." Then instruct the user to run
+**If all 8 items are selected:** State "✅ UI Design Approved." Then instruct the user to run
 `/feature-to-issues`.
 
 **If any items are NOT selected:** List each unconfirmed item, state "⛔ UI Design requires revision —
@@ -350,8 +383,12 @@ Zero-padded to 3 digits, globally unique within this design document. Downstream
 ## Design Guardrails
 
 ### NEVER
-- Invent a brand-critical decision (primary color, logo treatment, tone) without scan evidence or
-  explicit user input — ask instead of guessing.
+- Invent a brand-critical decision (primary color, logo treatment, tone) without `design-system.md`,
+  scan evidence, or explicit user input — ask instead of guessing.
+- Re-ask a question `ai-context/design-system.md` already answers (component library, token structure,
+  accessibility baseline) — it is a human-reviewed, authoritative source, not a suggestion to re-derive.
+- Skip the accessibility baseline entirely — pull it from `design-system.md` if present, otherwise ask;
+  never let mockups default to no standard.
 - Skip Step 3's multi-option generation for the layout-defining screen(s), even under time pressure —
   presenting a single generated layout as if it were the only option defeats the purpose of this skill.
 - Mix layout (structural) and style (visual) decisions into the same round of options — Step 3 stays
@@ -361,7 +398,9 @@ Zero-padded to 3 digits, globally unique within this design document. Downstream
 - Silently interpret an ambiguous "merge these layouts" request — restate and confirm first.
 
 ### ALWAYS
-- Report existing design-system scan findings before asking questions that evidence already answers.
+- Load `ai-context/design-system.md` in Step 0 if it exists, and treat it as authoritative.
+- Report `design-system.md` findings and codebase scan findings before asking questions either source
+  already answers.
 - Trace every screen to at least one Feature ID and User Story ID.
 - Cap the styled-mockup pass at 8 screens and explicitly list what was skipped.
 - Save both `docs/design/ui-design.md` and `ai-context/ui-design.md`.
@@ -373,9 +412,10 @@ Zero-padded to 3 digits, globally unique within this design document. Downstream
 
 | System | Compatibility |
 |---|---|
+| `/generate-project-constitution` (`design-system.md`) | ✅ Consumed as an authoritative upstream input in Step 0 — this skill never overrides its token/component/accessibility decisions, only fills the gaps it leaves open |
 | `/feature-to-issues` | ✅ Screen IDs, Component IDs, and mockup paths are structured for direct reference in UI-layer child issues |
 | `/write-test-plan` | ➖ No dependency — test plan is written before this skill and must remain implementation-independent |
-| Ralph-impl | ✅ Mockups describe intended structure/style for the UI layer; actual component implementation still follows `ai-context/coding-standards.md` and the project's real framework |
+| Ralph-impl | ✅ Mockups describe intended structure/style for the UI layer; actual component implementation still follows `ai-context/coding-standards.md`, `ai-context/design-system.md`, and the project's real framework |
 
 Screen IDs (`SCR-NNN`) and Component IDs (`CMP-NNN`) must be preserved verbatim by all downstream skills
 to maintain traceability.
