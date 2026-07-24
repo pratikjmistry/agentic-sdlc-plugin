@@ -338,26 +338,34 @@ Skipped from mockup pass (structural inventory only): [SCR-IDs, or "None"]
 
 ### Step 7 — HITL UI Design Review Checkpoint
 
-Use the `AskUserQuestion` tool. Present a **multi-select** question so the user confirms all items in a
-single interaction.
+Use the `AskUserQuestion` tool. `AskUserQuestion` hard-caps at **4 options per question** — this
+checklist has 8 items, so it must be split into **two sequential `multiSelect: true` calls**, not one.
+Aggregate the selections from both calls before evaluating. If a call returns the literal string
+`"[No preference]"`, treat that as zero items selected for that call — not an error, and not a reason
+to skip the check.
 
-**Call `AskUserQuestion` with:**
-- question: "Please confirm the UI Design review items that are complete. Select all that apply:"
+**Call 1 of 2 — `AskUserQuestion` with:**
+- question: "UI Design Review (1/2) — confirm the items that are complete:"
 - multiSelect: true
 - options:
   1. Screen inventory covers every User Story's needed views
   2. Navigation/IA map matches the expected user flows
   3. Selected layout pattern (including any merge) is approved
   4. Color palette, typography, and iconography match brand expectations
+
+**Call 2 of 2 — `AskUserQuestion` with:**
+- question: "UI Design Review (2/2) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   5. Mockups accurately reflect the approved layout and style
   6. Component inventory has no obvious missing shared components
   7. Theming choice (light/dark/both) is correctly reflected
   8. Mockups are consistent with `ai-context/design-system.md` where one exists (component library, tokens, accessibility baseline) — or its absence is confirmed and this was a from-scratch pass
 
-**If all 8 items are selected:** State "✅ UI Design Approved." Then instruct the user to run
+**If all 8 items are selected across both calls:** State "✅ UI Design Approved." Then instruct the user to run
 `/feature-to-issues`.
 
-**If any items are NOT selected:** List each unconfirmed item, state "⛔ UI Design requires revision —
+**If any items are NOT selected:** List each unconfirmed item (from either call), state "⛔ UI Design requires revision —
 do not proceed until all items are confirmed.", and halt.
 
 > This is the mandatory HITL gate between UI design and issue generation. Agents assist. Humans approve.

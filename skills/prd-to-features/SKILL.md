@@ -575,22 +575,31 @@ Then run the HITL checkpoint below.
 
 ### HITL Feature Review Checkpoint
 
-Use the `AskUserQuestion` tool to interactively collect confirmation before proceeding. Present a **multi-select** question so the user confirms all items in a single interaction.
+Use the `AskUserQuestion` tool to interactively collect confirmation before proceeding.
+`AskUserQuestion` hard-caps at **4 options per question** — this checklist has 6 items, so it must be
+split into **two sequential `multiSelect: true` calls**, not one. Aggregate the selections from both
+calls before evaluating. If a call returns the literal string `"[No preference]"`, treat that as zero
+items selected for that call — not an error, and not a reason to skip the check.
 
-**Call `AskUserQuestion` with:**
-- question: "Please confirm the Feature Breakdown review items that are complete. Select all that apply:"
+**Call 1 of 2 — `AskUserQuestion` with:**
+- question: "Feature Breakdown Review (1/2) — confirm the items that are complete:"
 - multiSelect: true
 - options:
   1. All Feature IDs and names are correct and agreed
   2. User Stories accurately represent business intent
   3. Feature scope boundaries are accepted
   4. Dependency ordering is correct
+
+**Call 2 of 2 — `AskUserQuestion` with:**
+- question: "Feature Breakdown Review (2/2) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   5. All HITL-flagged features have been reviewed
   6. Execution wave plan is agreed
 
-**If all 6 items are selected:** State "✅ Feature Breakdown Approved." Then instruct the user to run `/write-test-plan` next, followed by `/design-ui` and `/feature-to-issues`.
+**If all 6 items are selected across both calls:** State "✅ Feature Breakdown Approved." Then instruct the user to run `/write-test-plan` next, followed by `/design-ui` and `/feature-to-issues`.
 
-**If any items are NOT selected:** List each unconfirmed item, state "⛔ Feature Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
+**If any items are NOT selected:** List each unconfirmed item (from either call), state "⛔ Feature Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
 
 > This is the mandatory HITL gate between Feature planning and Issue generation. Agents assist. Humans approve.
 ---

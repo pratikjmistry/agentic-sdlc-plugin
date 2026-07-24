@@ -552,21 +552,30 @@ Files generated: [N]
 HITL CHECKPOINT — Constitution Review
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Use the `AskUserQuestion` tool to interactively collect confirmation before proceeding. Present a **multi-select** question so the user confirms all items in a single interaction.
+Use the `AskUserQuestion` tool to interactively collect confirmation before proceeding.
+`AskUserQuestion` hard-caps at **4 options per question** — this checklist has 5 items, so it must be
+split into **two sequential `multiSelect: true` calls**, not one. Aggregate the selections from both
+calls before evaluating. If a call returns the literal string `"[No preference]"`, treat that as zero
+items selected for that call — not an error, and not a reason to skip the check.
 
-**Call `AskUserQuestion` with:**
-- question: "Please confirm the Project Constitution review items that are complete. Select all that apply:"
+**Call 1 of 2 — `AskUserQuestion` with:**
+- question: "Constitution Review (1/2) — confirm the items that are complete:"
 - multiSelect: true
 - options:
   1. Technology choices accurately reflect project decisions
   2. Architecture matches intended system design
   3. Security model covers all applicable threats
+
+**Call 2 of 2 — `AskUserQuestion` with:**
+- question: "Constitution Review (2/2) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   4. Testing strategy meets quality expectations
   5. No contradictions between constitution files
 
-**If all 5 items are selected:** State "✅ Constitution Approved." Then instruct the user to run `/prd-to-features`.
+**If all 5 items are selected across both calls:** State "✅ Constitution Approved." Then instruct the user to run `/prd-to-features`.
 
-**If any items are NOT selected:** List each unconfirmed item, state "⛔ Constitution requires revision — update the relevant files before proceeding.", and halt.
+**If any items are NOT selected:** List each unconfirmed item (from either call), state "⛔ Constitution requires revision — update the relevant files before proceeding.", and halt.
         ☐ Requires Revision — update files before proceeding
 
 Next step: /prd-to-features

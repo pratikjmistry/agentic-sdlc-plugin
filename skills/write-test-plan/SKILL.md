@@ -289,24 +289,33 @@ Traceability:
 HITL CHECKPOINT — Test Plan Review
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Use the `AskUserQuestion` tool to interactively collect confirmation before proceeding. Present a **multi-select** question so the user confirms all items in a single interaction.
+Use the `AskUserQuestion` tool to interactively collect confirmation before proceeding.
+`AskUserQuestion` hard-caps at **4 options per question** — this checklist has 7 items, so it must be
+split into **two sequential `multiSelect: true` calls**, not one. Aggregate the selections from both
+calls before evaluating. If a call returns the literal string `"[No preference]"`, treat that as zero
+items selected for that call — not an error, and not a reason to skip the check.
 
-**Call `AskUserQuestion` with:**
-- question: "Please confirm the Test Plan review items that are complete. Select all that apply:"
+**Call 1 of 2 — `AskUserQuestion` with:**
+- question: "Test Plan Review (1/2) — confirm the items that are complete:"
 - multiSelect: true
 - options:
   1. Every Must Have FR has at least one unit test spec
   2. Every AC maps to at least one test (unit or integration)
   3. Smoke suite covers the critical deployment path
   4. No test case references implementation details
+
+**Call 2 of 2 — `AskUserQuestion` with:**
+- question: "Test Plan Review (2/2) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   5. Regression impact map accurately reflects feature dependencies
   6. Integration tests correctly identify real vs. stubbed dependencies
   7. An automated traceability-check script/CI job exists (or is scoped as a same-cycle deliverable)
      and covers every UT-/IT-/E2E- ID in this plan — see `ai-context/testing.md`'s CI Gate
 
-**If all 7 items are selected:** State "✅ Test Plan Approved." Then instruct the user to run `/design-ui`, followed by `/feature-to-issues`.
+**If all 7 items are selected across both calls:** State "✅ Test Plan Approved." Then instruct the user to run `/design-ui`, followed by `/feature-to-issues`.
 
-**If any items are NOT selected:** List each unconfirmed item, state "⛔ Test Plan requires revision — do not proceed until all items are confirmed.", and halt.
+**If any items are NOT selected:** List each unconfirmed item (from either call), state "⛔ Test Plan requires revision — do not proceed until all items are confirmed.", and halt.
         ☐ Requires Revision — do not proceed until gaps are addressed
 
 Next step: /design-ui

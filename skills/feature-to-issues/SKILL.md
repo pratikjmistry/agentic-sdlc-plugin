@@ -250,29 +250,48 @@ Issue structure:
 
 Saved to: /ai-context/issues.json
 
-Use the `AskUserQuestion` tool to interactively collect confirmation. Present a **multi-select** question so the user confirms all items in a single interaction.
+Use the `AskUserQuestion` tool to interactively collect confirmation.
+`AskUserQuestion` hard-caps at **4 options per question** — this checklist has 13 items, so it must be
+split into **four sequential `multiSelect: true` calls**, not one. Aggregate the selections from all
+four calls before evaluating. If a call returns the literal string `"[No preference]"`, treat that as
+zero items selected for that call — not an error, and not a reason to skip the check.
 
-**Call `AskUserQuestion` with:**
-- question: "Please confirm the Issue Review items that are complete. Select all that apply:"
+**Call 1 of 4 — `AskUserQuestion` with:**
+- question: "Issue Review (1/4) — confirm the items that are complete:"
 - multiSelect: true
 - options:
   1. All issues correctly scoped and named
   2. Acceptance criteria testable and complete
   3. Dependency ordering is correct
   4. Layer assignments correct (DB/API/UI/INT/TEST/E2E)
+
+**Call 2 of 4 — `AskUserQuestion` with:**
+- question: "Issue Review (2/4) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   5. No issues missing; no duplicate scope
   6. Execution wave plan agreed
   7. Epic groupings reflect Feature boundaries
+
+**Call 3 of 4 — `AskUserQuestion` with:**
+- question: "Issue Review (3/4) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   8. Every implementation issue has mapped UT- test IDs
   9. TEST issues cover all IT- IDs from test plan
   10. E2E issues cover all E2E- smoke test IDs from test plan
+
+**Call 4 of 4 — `AskUserQuestion` with:**
+- question: "Issue Review (4/4) — confirm the items that are complete:"
+- multiSelect: true
+- options:
   11. Every feature has at least one INT issue covering end-to-end integration (auto-generated ones confirmed and scoped correctly)
   12. Every issue's DOMAIN prefix matches a declared bounded context in architecture.md (or the project is confirmed single-domain)
   13. Every UI-layer issue references an approved Screen ID/Component ID from ui-design.md (or the gap is explicitly noted if UI design was skipped)
 
-**If all 13 items are selected:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
+**If all 13 items are selected across all four calls:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
 
-**If any items are NOT selected:** List each unconfirmed item, state "⛔ Issue Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
+**If any items are NOT selected:** List each unconfirmed item (from any call), state "⛔ Issue Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
 
 > The user may also reply EXPORT to receive the JSON manifest only (already saved — no further action needed).
 ```
