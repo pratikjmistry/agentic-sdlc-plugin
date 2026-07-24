@@ -2,7 +2,7 @@
 
 End-to-end SDLC workflow for Claude Code — from raw idea to implemented, tested, and shipped code.
 
-Covers the full lifecycle: **grill → PRD → project constitution → features → test plan → issues → PMS → Ralph implementation loop**.
+Covers the full lifecycle: **grill → PRD → project constitution → features → test plan → UI design → issues → PMS → Ralph implementation loop**.
 
 ---
 
@@ -51,6 +51,8 @@ claude plugin install linear@claude-plugins-official
   ↓ HITL Feature Review
 /agentic-sdlc:write-test-plan               → Generate TDD test plan (UT-, IT-, ST-, RT-)
   ↓ HITL Test Plan Review
+/agentic-sdlc:design-ui                     → Elicit design preferences, generate UI mockups
+  ↓ HITL UI Design Review
 /agentic-sdlc:feature-to-issues             → Decompose features into atomic issues
   ↓ HITL Issue Review
 /agentic-sdlc:push-to-pms                   → Push issues to GitHub / Jira / Linear / ADO / GitLab
@@ -88,6 +90,7 @@ claude --agent agentic-sdlc:ralph-e2e       → Write E2E tests against staging 
 | PRD to Features | `/agentic-sdlc:prd-to-features` | Decomposes PRD into Features with User Stories |
 | Write Feature | `/agentic-sdlc:write-feature` | Brownfield path — documents a single feature without a full PRD |
 | Write Test Plan | `/agentic-sdlc:write-test-plan` | Generates a TDD test plan from FRs and ACs |
+| Design UI | `/agentic-sdlc:design-ui` | Elicits design preferences, generates layout options and HTML mockups |
 | Feature to Issues | `/agentic-sdlc:feature-to-issues` | Decomposes features into atomic, dependency-ordered issues |
 | Push to PMS | `/agentic-sdlc:push-to-pms` | Creates issues in your chosen project management platform |
 
@@ -166,6 +169,8 @@ Feature specs are saved to `docs/features/`:
 | `feature-summary.md` | `/prd-to-features` |
 | `F-XX-slug.md` | `/prd-to-features` |
 | `test-plan.md` | `/write-test-plan` |
+| `design/ui-design.md` | `/design-ui` |
+| `design/mockups/*.html` | `/design-ui` |
 
 ---
 

@@ -7,7 +7,8 @@ description: >
   "generate feature list from PRD", "break PRD into capabilities", "turn this PRD into a feature breakdown",
   or when the user shares a PRD and asks what should be built.
   Step 3 of the Greenfield workflow: /grill → /write-prd → [/prd-to-features] → HITL Feature Review
-  → /write-test-plan → HITL Test Plan Review → /feature-to-issues → HITL Issue Review → Ready to Develop.
+  → /write-test-plan → HITL Test Plan Review → /design-ui → HITL UI Design Review
+  → /feature-to-issues → HITL Issue Review → Ready to Develop.
   Always use this skill before /feature-to-issues in the Greenfield path. Never skip this step.
 ---
 
@@ -20,11 +21,12 @@ description: >
 ```
 GREENFIELD:  /grill → /write-prd → [/prd-to-features] → HITL Feature Review
                                                         → /write-test-plan → HITL Test Plan Review
+                                                        → /design-ui → HITL UI Design Review
                                                         → /feature-to-issues → HITL Issue Review → Ready to Develop
 ```
 
 **Input:** Approved PRD from `/write-prd` (HITL Checkpoint Section 16 must be confirmed before this skill runs).
-**Output:** Feature Breakdown → feeds into HITL Feature Review gate → then `/write-test-plan` → then `/feature-to-issues`.
+**Output:** Feature Breakdown → feeds into HITL Feature Review gate → then `/write-test-plan` → then `/design-ui` → then `/feature-to-issues`.
 
 **Do not run this skill if the PRD HITL review has not been completed.**
 **Do not run this skill on brownfield enhancements** — use `/write-feature` instead.
@@ -36,7 +38,7 @@ This skill converts a structured PRD into a set of logically grouped **Features*
 It operates exclusively at the **Feature Layer** in the AI-driven software delivery hierarchy:
 
 ```
-PRD  →  [THIS SKILL]  →  Features  →  /write-test-plan  →  /feature-to-issues  →  Issues  →  PRs
+PRD  →  [THIS SKILL]  →  Features  →  /write-test-plan  →  /design-ui  →  /feature-to-issues  →  Issues  →  PRs
 ```
 
 ### What This Skill DOES
@@ -393,11 +395,11 @@ Output one of the following as plain Markdown text based on output quality and H
 
 **Option A — No HITL flags:**
 
-> ✅ All features are well-defined. Submit for HITL review, then run `/write-test-plan` followed by `/feature-to-issues`.
+> ✅ All features are well-defined. Submit for HITL review, then run `/write-test-plan` followed by `/design-ui` and `/feature-to-issues`.
 
 **Option B — HITL flags present:**
 
-> ⚠️ The following features require human review before proceeding: **F-XX** ([reason]). After sign-off, run `/write-test-plan` then `/feature-to-issues` on approved features only.
+> ⚠️ The following features require human review before proceeding: **F-XX** ([reason]). After sign-off, run `/write-test-plan` then `/design-ui` then `/feature-to-issues` on approved features only.
 
 **Option C — PRD clarification needed:**
 
@@ -586,7 +588,7 @@ Use the `AskUserQuestion` tool to interactively collect confirmation before proc
   5. All HITL-flagged features have been reviewed
   6. Execution wave plan is agreed
 
-**If all 6 items are selected:** State "✅ Feature Breakdown Approved." Then instruct the user to run `/write-test-plan` next, followed by `/feature-to-issues`.
+**If all 6 items are selected:** State "✅ Feature Breakdown Approved." Then instruct the user to run `/write-test-plan` next, followed by `/design-ui` and `/feature-to-issues`.
 
 **If any items are NOT selected:** List each unconfirmed item, state "⛔ Feature Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
 

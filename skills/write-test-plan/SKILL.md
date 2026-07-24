@@ -11,7 +11,8 @@ description: >
   "test cases from acceptance criteria", "define tests before coding",
   or any request to define test cases based on functionality rather than implementation.
   Step 3.5 of the Greenfield workflow: /prd-to-features → HITL Feature Review
-  → [/write-test-plan] → HITL Test Plan Review → /feature-to-issues → Ready to Develop.
+  → [/write-test-plan] → HITL Test Plan Review → /design-ui → HITL UI Design Review
+  → /feature-to-issues → Ready to Develop.
 ---
 
 # /write-test-plan — Requirements-Driven Test Plan Generator
@@ -24,6 +25,7 @@ description: >
 GREENFIELD:
   /grill → /write-prd → /generate-project-constitution → /prd-to-features
     → HITL Feature Review → [/write-test-plan] → HITL Test Plan Review
+    → /design-ui → HITL UI Design Review
     → /feature-to-issues → HITL Issue Review → Ready to Develop
 ```
 
@@ -31,7 +33,7 @@ GREENFIELD:
 
 **Output:** A structured test plan saved to `/ai-context/test-plan.md`, covering four test types — unit, integration, smoke, and regression.
 
-**Why here:** Test cases must exist before development begins. Placing this step after feature review (so the full requirement picture is clear) but before issue creation (so issues can reference test IDs) ensures engineers and AI agents know exactly what to verify before a feature is considered done.
+**Why here:** Test cases must exist before development begins. Placing this step after feature review (so the full requirement picture is clear) but before issue creation (so issues can reference test IDs) ensures engineers and AI agents know exactly what to verify before a feature is considered done. It runs before `/design-ui` deliberately — the test plan must stay implementation-independent, derived only from requirements, not from screens or components.
 
 ---
 
@@ -302,13 +304,13 @@ Use the `AskUserQuestion` tool to interactively collect confirmation before proc
   7. An automated traceability-check script/CI job exists (or is scoped as a same-cycle deliverable)
      and covers every UT-/IT-/E2E- ID in this plan — see `ai-context/testing.md`'s CI Gate
 
-**If all 7 items are selected:** State "✅ Test Plan Approved." Then instruct the user to run `/feature-to-issues`.
+**If all 7 items are selected:** State "✅ Test Plan Approved." Then instruct the user to run `/design-ui`, followed by `/feature-to-issues`.
 
 **If any items are NOT selected:** List each unconfirmed item, state "⛔ Test Plan requires revision — do not proceed until all items are confirmed.", and halt.
         ☐ Requires Revision — do not proceed until gaps are addressed
 
-Next step: /feature-to-issues
-(When running /feature-to-issues, reference test IDs from this plan
+Next step: /design-ui
+(When running /feature-to-issues later, reference test IDs from this plan
  so that each issue includes the specific test cases it must satisfy.)
 ```
 

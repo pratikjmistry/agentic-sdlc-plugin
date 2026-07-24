@@ -19,6 +19,7 @@ It converts an approved Feature Breakdown into a structured, platform-agnostic i
 GREENFIELD:
   /grill → /write-prd → /generate-project-constitution → /prd-to-features
     → HITL Feature Review → /write-test-plan → HITL Test Plan Review
+    → /design-ui → HITL UI Design Review
     → [/feature-to-issues] → HITL Issue Review → /push-to-pms → Ready to Develop
 ```
 
@@ -36,6 +37,10 @@ GREENFIELD:
 |--------|---------------|------|
 | `/prd-to-features` output | Contains `F-XX` Feature IDs, `US-XX.N` User Story IDs, Dependency Map | Greenfield |
 | `/write-feature` output | Contains `FEAT-XXX` Feature ID, `US-XXX.N` User Story IDs, HITL confirmed | Brownfield |
+
+**Optional input:** `/design-ui` output (`ai-context/ui-design.md`) — if present, UI-layer child issues
+reference its Screen ID (`SCR-NNN`) and Component ID (`CMP-NNN`) entries directly. If absent, UI-layer
+issues are scoped from User Story descriptions alone and the gap is noted in the HITL checkpoint.
 
 **Minimum acceptable Feature input:**
 - At least one Feature with valid ID (`F-XX` or `FEAT-XXX` format)
@@ -130,8 +135,9 @@ Load before any output:
 5. `ai-context/test-plan.md` — extract all UT-, IT-, E2E-, RT- test IDs keyed to each FR-n, AC-n, and US-XX.N
 6. `ai-context/database-guidelines.md` — load naming conventions, ID strategy, migration tooling, auditing approach, soft-delete strategy, and ORM guidance. Apply these to all DB-layer issues.
 7. **Entity Ownership Map** — read the `## Entity Ownership` table from `docs/features/feature-summary.md`. Build an in-memory map of which feature owns which entities. Use this to generate correct schema/migration tasks per feature and to avoid duplicate entity definitions across features.
+8. `ai-context/ui-design.md` — extract the Screen Inventory (`SCR-NNN`) and Component Inventory (`CMP-NNN`) tables, keyed to Feature IDs and User Story IDs. Use this to populate the UI Design Reference section of UI-layer child issues.
 
-Note missing files and proceed. If `test-plan.md` is absent, omit the Test Requirements section from issue templates and note the gap in the HITL checkpoint. If `database-guidelines.md` is absent, note the gap and use reasonable defaults for DB naming. If the Entity Ownership table is absent, infer ownership from User Story descriptions and flag ambiguities in the HITL checkpoint.
+Note missing files and proceed. If `test-plan.md` is absent, omit the Test Requirements section from issue templates and note the gap in the HITL checkpoint. If `database-guidelines.md` is absent, note the gap and use reasonable defaults for DB naming. If the Entity Ownership table is absent, infer ownership from User Story descriptions and flag ambiguities in the HITL checkpoint. If `ui-design.md` is absent, scope UI-layer issues from User Story descriptions alone and note the gap in the HITL checkpoint.
 
 ### Step 2 — Validate Feature Input
 
@@ -262,8 +268,9 @@ Use the `AskUserQuestion` tool to interactively collect confirmation. Present a 
   10. E2E issues cover all E2E- smoke test IDs from test plan
   11. Every feature has at least one INT issue covering end-to-end integration (auto-generated ones confirmed and scoped correctly)
   12. Every issue's DOMAIN prefix matches a declared bounded context in architecture.md (or the project is confirmed single-domain)
+  13. Every UI-layer issue references an approved Screen ID/Component ID from ui-design.md (or the gap is explicitly noted if UI design was skipped)
 
-**If all 12 items are selected:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
+**If all 13 items are selected:** State "✅ Issue Breakdown Approved." Then instruct the user to run `/push-to-pms` to create issues in their project management platform.
 
 **If any items are NOT selected:** List each unconfirmed item, state "⛔ Issue Breakdown requires revision — do not proceed until all items are confirmed.", and halt.
 
@@ -445,6 +452,21 @@ Write "None — root issue." if no dependencies.
 - None
 
 > ⚠️ If cardinality or nullable status is ambiguous for any field, use `AskUserQuestion` before generating the issue. Example: *"The [EntityName].[fieldName] field — is this required (NOT NULL) or optional (nullable)?"*
+
+---
+
+#### UI Design Reference *(UI-layer issues only — omit for DB/API/INT)*
+
+> Populate from `/ai-context/ui-design.md` by matching this issue's Feature ID and User Story reference.
+
+| Field | Value |
+|-------|-------|
+| **Screen ID** | [SCR-NNN — from ui-design.md] |
+| **Component(s)** | [CMP-NNN, CMP-NNN — from ui-design.md, or "None — screen-specific only"] |
+| **Mockup** | [`docs/design/mockups/[SCR-NNN]-slug.html`, or "Structural inventory only — not mocked"] |
+| **Layout/Style Notes** | [Anything from ui-design.md's Screen Detail entry the implementer needs — states, primary actions] |
+
+If `ui-design.md` is not present, write: "No UI design available — scope from User Story description; confirm layout/style with product owner during implementation."
 
 ---
 

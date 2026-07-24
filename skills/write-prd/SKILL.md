@@ -97,7 +97,8 @@ In the connected project folder, create the following directories if they do not
 <project-root>/
 ├── ai-context/          ← agent context files (read by all downstream skills)
 └── docs/
-    └── features/        ← individual feature docs (write-feature brownfield outputs)
+    ├── features/        ← individual feature docs (write-feature brownfield outputs)
+    └── design/          ← UI design doc + mockups (/design-ui outputs)
 ```
 
 Create `ai-context/project.json` if it does not exist:
@@ -113,6 +114,7 @@ Create `ai-context/project.json` if it does not exist:
     "feature_summary": "docs/features/feature-summary.md",
     "features_dir": "docs/features/",
     "test_plan": "docs/test-plan.md",
+    "ui_design": "docs/design/ui-design.md",
     "issues_manifest": "ai-context/issues.json"
   }
 }
@@ -134,6 +136,8 @@ All skills in this workflow write artifacts to these **project-root-relative** p
 | Feature Files | `docs/features/F-XX-<slug>.md` (one per feature) | `/prd-to-features` |
 | Feature Doc (brownfield) | `docs/features/<FEAT-ID>-<slug>.md` | `/write-feature` |
 | Test Plan | `docs/test-plan.md` | `/write-test-plan` |
+| UI Design | `docs/design/ui-design.md` | `/design-ui` |
+| UI Mockups | `docs/design/mockups/*.html` | `/design-ui` |
 | Issue Manifest | `ai-context/issues.json` | `/feature-to-issues` |
 
 > All paths are relative to the connected project folder. **Never write artifacts to the temporary outputs folder.** The connected folder IS the project root.
