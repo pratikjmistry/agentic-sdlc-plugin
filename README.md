@@ -70,6 +70,29 @@ claude plugin install linear@claude-plugins-official
 /agentic-sdlc:push-to-pms                   → Push to PMS
 ```
 
+### Brownfield Onboarding (long-lived, undocumented repos)
+
+For repos where code is the source of truth and there's no documentation to speak of — running the
+Greenfield flow's spec-first constitution generator on one of these produces an aspirational document the
+repo mostly contradicts. This pathway triages first:
+
+```
+/agentic-sdlc:assess-repo <git-url-or-path>  → Phase 0: score agent-readiness, verdict + trust level
+  ↓ ONBOARD_NOW / ONBOARD_AFTER_REMEDIATION / DEFER / DO_NOT_ONBOARD
+Phase 1  → autonomy floor (reproducible build + verifiable test signal)
+Phase 2  → reverse-engineer context (/map-codebase, /discover-constitution, /generate-zone-context)
+Phase 3  → /characterize — characterization test harness
+Phase 4  → /baseline-debt — debt baseline + ratchet
+Phase 5  → /plan-seams — seam creation, lazy, per-zone
+Phase 6  → graduated autonomy per zone (trust levels L0–L4)
+Phase 7  → /verify-context — context drift detection in CI
+```
+
+Only Phase 0 (`/assess-repo`) is implemented today — it's a deterministic scoring pass (no model call
+computes a score), cheap enough to run across a 20–40 repo portfolio, and it's the gate that decides
+whether the rest of this pathway is worth investing in for a given repo at all. Phases 1–7 are the planned
+next phases of this pathway, not yet built.
+
 ### Ralph implementation loop (after issues are in PMS)
 
 ```
@@ -93,6 +116,7 @@ claude --agent agentic-sdlc:ralph-e2e       → Write E2E tests against staging 
 | Design UI | `/agentic-sdlc:design-ui` | Elicits design preferences, generates layout options and HTML mockups |
 | Feature to Issues | `/agentic-sdlc:feature-to-issues` | Decomposes features into atomic, dependency-ordered issues |
 | Push to PMS | `/agentic-sdlc:push-to-pms` | Creates issues in your chosen project management platform |
+| Assess Repo | `/agentic-sdlc:assess-repo` | Brownfield Phase 0 — deterministically scores a repo's agent-readiness (git/build/test/CI/deps/debt/structure), gives a verdict, trust level, and pilot zone |
 
 ---
 
@@ -171,6 +195,11 @@ Feature specs are saved to `docs/features/`:
 | `test-plan.md` | `/write-test-plan` |
 | `design/ui-design.md` | `/design-ui` |
 | `design/mockups/*.html` | `/design-ui` |
+
+`/assess-repo` writes outside both of those, to a separate output directory (default
+`./.assessment/<repo>-<shortsha>/`), never into the analyzed repo itself: `assessment-inputs.json`,
+`assessment-scores.json`, `zones.json`, `agent-readiness-report.md`, `remediation-plan.md`, and an
+appended row in `portfolio.csv`.
 
 ---
 

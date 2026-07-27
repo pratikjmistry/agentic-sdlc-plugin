@@ -1,0 +1,266 @@
+# /assess-repo scoring rubric.
+#
+# Versioned deliberately: score.py reads this file (or a --rubric override)
+# and refuses to run against an assessment-inputs.json whose rubric_version
+# doesn't match. Numeric thresholds live here so they're reviewable and
+# changeable without touching score.py. The SHAPE of the scoring logic (which
+# conditions map to which band, gate precedence, verdict precedence) lives in
+# score.py as versioned code, not as data here — seeing this file evaluated
+# without a matching score.py isn't a supported combination. Rationale for
+# every weight and threshold below: references/rubric-design.md.
+
+rubric_version: "1.0"
+
+# ---------------------------------------------------------------------------
+# Hard gates. Any failing gate caps the verdict at ONBOARD_AFTER_REMEDIATION
+# and caps the recommended starting trust level at L0, regardless of the
+# weighted score. An "unavailable" metric backing a gate counts as FAILING
+# that gate — a hard gate that cannot be verified is not assumed to pass.
+# ---------------------------------------------------------------------------
+hard_gates:
+  GATE_VCS:
+    description: "Git history is accessible and a default branch is identifiable."
+    remediation: >
+      Initialize git history tracking, or provide a resolvable git URL/local git
+      repository. Agents need reliable version history for blast-radius and
+      hotspot analysis — without it, this pathway cannot proceed at all.
+
+  GATE_BUILD:
+    description: >
+      A clean-clone build succeeds, or (in the default detect-only mode) a
+      one-command documented build path exists — containerized, a devcontainer,
+      or a documented single build command.
+    remediation: >
+      Document a one-command build path (README build section, Dockerfile, or
+      devcontainer) if none exists yet, or re-run this assessment with
+      --attempt-build inside a disposable container for a real (rather than
+      detect-only) signal.
+
+  GATE_TEST_SIGNAL:
+    description: "A test suite executes to a deterministic pass/fail result."
+    remediation: >
+      Re-run with --attempt-test (requires --attempt-build) inside a
+      disposable container for a real signal — detect-only mode cannot
+      execute the suite. If no test suite exists at all, this gate cannot
+      pass until Phase 3's characterization harness creates one.
+
+  GATE_CI:
+    description: "CI runs on pull request."
+    remediation: >
+      Configure a CI pipeline that runs on every pull request (lint/build/test
+      at minimum), or check that the existing pipeline's trigger configuration
+      is in a format this assessment's ci_probe can parse.
+
+  GATE_POLICY:
+    description: "The declared client data policy permits the tooling this pathway requires."
+    remediation: >
+      Narrow provider selection to fully in-house, air-gapped analysis
+      (git + language census only, no Graphify/semgrep/cloud lookups), or
+      obtain a policy exception before proceeding.
+
+# ---------------------------------------------------------------------------
+# Weighted dimensions, summing to 100. A dimension requires ALL of its listed
+# backing metrics to have confidence != "unavailable"; if any one is missing,
+# the WHOLE dimension is marked unavailable and its weight is redistributed
+# proportionally across the remaining available dimensions (see score.py:
+# `compute_weighted_score`). This all-or-nothing rule per dimension is
+# deliberate — partial credit within a dimension would itself be a form of
+# implementer discretion the "no interpolation" design decision forbids.
+# ---------------------------------------------------------------------------
+dimensions:
+  build_reproducibility:
+    weight: 20
+    backing_metrics:
+      - build.containerized
+      - build.devcontainer_present
+      - build.one_command_build_documented
+      - build.detected_systems
+      - build.lockfiles_present
+    bands:  # highest matching band wins; see score.py:score_build_reproducibility
+      - score: 100
+        when: "containerized or devcontainer_present, AND one_command_build_documented, AND (if attempted) exit_code == 0"
+      - score: 75
+        when: "one_command_build_documented (without containerization)"
+      - score: 50
+        when: "lockfiles_present AND detected_systems is non-empty"
+      - score: 25
+        when: "detected_systems is non-empty only"
+      - score: 0
+        when: "no build system detected"
+
+  test_safety_net:
+    weight: 20
+    backing_metrics:
+      - test.suite_executes
+      - test.coverage_pct
+      - test.unit_present
+      - test.integration_present
+      - test.test_file_count
+    bands:  # see score.py:score_test_safety_net
+      - score: 100
+        when: "suite_executes AND coverage_pct >= 70 AND unit_present AND integration_present"
+      - score: 80
+        when: "suite_executes AND coverage_pct >= 40"
+      - score: 60
+        when: "suite_executes (coverage_pct < 40 or unknown)"
+      - score: 30
+        when: "test_file_count > 0 but suite does not execute"
+      - score: 0
+        when: "test_file_count == 0"
+
+  change_demand:
+    weight: 15
+    backing_metrics:
+      - human_inputs.roadmap_demand_next_2q
+    bands:  # see score.py:score_change_demand — deliberately human-input-only;
+            # commit velocity must never substitute for a human roadmap answer
+            # (a quiet repo can be quiet because it's stable, not dying).
+      - score: 100
+        when: "roadmap_demand_next_2q == heavy"
+      - score: 70
+        when: "roadmap_demand_next_2q == moderate"
+      - score: 30
+        when: "roadmap_demand_next_2q == low"
+      - score: 0
+        when: "roadmap_demand_next_2q == none"
+
+  structural_modularity:
+    weight: 12
+    backing_metrics:
+      - structure.parser_coverage_pct
+      - structure.cyclic_dependency_count
+      - structure.god_nodes
+      - structure.avg_fan_out
+    bands:  # gated by parser_coverage_pct first — see score.py:score_structural_modularity
+      - score: 100
+        when: "cyclic_dependency_count == 0 AND god_nodes empty AND avg_fan_out <= 5"
+      - score: 70
+        when: "cyclic_dependency_count <= 2 AND avg_fan_out <= 10"
+      - score: 40
+        when: "cyclic_dependency_count <= 10 OR god_nodes has fewer than 5 entries"
+      - score: 15
+        when: "cyclic_dependency_count > 10 or many god_nodes"
+      - score: 0
+        when: "pervasive cycles / extreme fan-out"
+
+  stack_coherence:
+    weight: 10
+    backing_metrics:
+      - codebase.distinct_stacks_count
+      - deps.duplicate_framework_versions
+      - deps.median_majors_behind
+    bands:  # see score.py:score_stack_coherence
+      - score: 100
+        when: "distinct_stacks_count <= 2 AND no duplicate framework versions AND median_majors_behind <= 1"
+      - score: 70
+        when: "distinct_stacks_count <= 4 AND no duplicate framework versions"
+      - score: 40
+        when: "one duplicate-version framework OR distinct_stacks_count between 5 and 7"
+      - score: 15
+        when: "multiple duplicate-version frameworks OR distinct_stacks_count > 7"
+      - score: 0
+        when: "severe fragmentation (3+ duplicate-version frameworks)"
+
+  debt_containability:
+    weight: 8
+    backing_metrics:
+      - debt.violations_per_kloc
+      - debt.baselineable
+    bands:  # see score.py:score_debt_containability
+      - score: 100
+        when: "violations_per_kloc <= 5 AND baselineable"
+      - score: 70
+        when: "violations_per_kloc <= 20 AND baselineable"
+      - score: 40
+        when: "violations_per_kloc <= 50"
+      - score: 15
+        when: "violations_per_kloc <= 150"
+      - score: 0
+        when: "violations_per_kloc > 150, or not baselineable at all"
+
+  context_availability:
+    weight: 5
+    backing_metrics:
+      - context.readme_quality_score
+      - context.adr_count
+      - context.domain_glossary_present
+      - context.ai_context_present
+    bands:  # see score.py:score_context_availability
+      - score: 100
+        when: "ai_context_present, OR (readme_quality_score >= 80 AND (adr_count > 0 OR domain_glossary_present))"
+      - score: 70
+        when: "readme_quality_score >= 60"
+      - score: 40
+        when: "readme_quality_score >= 30"
+      - score: 15
+        when: "readme_quality_score > 0"
+      - score: 0
+        when: "no usable README/context signal"
+
+  blast_radius_containment:
+    weight: 5
+    backing_metrics:
+      - ops.staging_env_declared
+      - structure.cross_stack_edge_count
+      - vcs.hotspots
+    bands:  # see score.py:score_blast_radius_containment
+      - score: 100
+        when: "staging_env_declared AND cross_stack_edge_count == 0"
+      - score: 70
+        when: "staging_env_declared AND cross_stack_edge_count <= 5"
+      - score: 40
+        when: "staging_env_declared, higher cross_stack_edge_count"
+      - score: 10
+        when: "no staging environment declared"
+    note: >
+      staging_env_declared is also a hard input to the L4 trust-level gate
+      independent of this dimension's sub-score — ralph-e2e writes tests
+      against staging, so its absence caps a zone at L3 regardless of how
+      high blast_radius_containment itself scores.
+
+  analyzability:
+    weight: 5
+    backing_metrics:
+      - structure.parser_coverage_pct
+    bands:  # see score.py:score_analyzability
+      - score: 100
+        when: "parser_coverage_pct >= 90"
+      - score: 70
+        when: "parser_coverage_pct >= 70"
+      - score: 40
+        when: "parser_coverage_pct >= 50"
+      - score: 15
+        when: "parser_coverage_pct >= 20"
+      - score: 0
+        when: "parser_coverage_pct < 20"
+
+# ---------------------------------------------------------------------------
+# Externalized numeric thresholds referenced by score.py and the providers.
+# ---------------------------------------------------------------------------
+thresholds:
+  onboard_now_min_score: 70
+  onboard_after_remediation_min_score: 45
+  structure_parser_coverage_min_for_use: 50  # below this, structural_modularity is unavailable regardless of other structure.* values
+  stale_branch_days: 90
+
+# ---------------------------------------------------------------------------
+# Verdict and trust-level precedence is implemented in score.py
+# (see `determine_verdict` and `recommend_trust_level`); summarized here for
+# reference. references/rubric-design.md documents the reasoning for the
+# tie-break cases the plain-English spec left ambiguous.
+# ---------------------------------------------------------------------------
+verdict_precedence:
+  - "1. DO_NOT_ONBOARD override: human_inputs.roadmap_demand_next_2q in [none, low], OR sunset_or_replatform_planned == true. Regardless of gates or score. Skipped (falls through) if roadmap_demand_next_2q itself is unavailable — never guessed."
+  - "2. Any hard gate failing (including unavailable-therefore-failing) -> ONBOARD_AFTER_REMEDIATION, trust level capped at L0."
+  - "3. All gates pass: score >= onboard_now_min_score -> ONBOARD_NOW."
+  - "4. All gates pass: onboard_after_remediation_min_score <= score < onboard_now_min_score -> ONBOARD_AFTER_REMEDIATION."
+  - "5. All gates pass: score < onboard_after_remediation_min_score AND roadmap_demand_next_2q == heavy -> DEFER."
+  - "6. All gates pass: score < onboard_after_remediation_min_score, demand not heavy (or unavailable) -> ONBOARD_AFTER_REMEDIATION (floor exists per passing gates; still worth a remediation attempt)."
+  - "7. weighted_score is null (no dimension had enough data to score) -> ONBOARD_AFTER_REMEDIATION with an explicit insufficient-data note. Can only occur if gates somehow all passed despite near-total data absence; treated as an edge case."
+
+trust_levels:
+  L0: { may: "Read + propose plans only", gate_to_advance: null }
+  L1: { may: "Open PRs, human reviews every line", gate_to_advance: ">80% PR acceptance over 20 PRs" }
+  L2: { may: "Open PRs, human reviews diff summary", gate_to_advance: "zero escape defects over 4 weeks" }
+  L3: { may: "Auto-merge on green CI, low-blast-radius changes", gate_to_advance: "sustained L2 metrics" }
+  L4: { may: "Multi-issue autonomous loops (Ralph)", gate_to_advance: "zone coverage >70% at seams" }

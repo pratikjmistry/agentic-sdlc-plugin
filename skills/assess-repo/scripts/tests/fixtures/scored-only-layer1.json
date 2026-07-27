@@ -1,0 +1,696 @@
+{
+  "schema_version": "1.0",
+  "rubric_version": "1.0",
+  "assessment_id": "fixture-only-layer1",
+  "generated_at": "2026-07-27T00:00:00+00:00",
+  "target": {
+    "mode": "git_url",
+    "source": "https://example.com/org/repo.git",
+    "resolved_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "default_branch": "main",
+    "history_complete": true,
+    "analyzed_path": "/tmp/repo",
+    "is_monorepo": false,
+    "detected_projects": [],
+    "submodules": []
+  },
+  "providers": [
+    {
+      "name": "git",
+      "version": "",
+      "status": "ok",
+      "reason": ""
+    }
+  ],
+  "exclusions": {
+    "patterns": [
+      "node_modules/**"
+    ],
+    "excluded_loc": 500,
+    "excluded_file_count": 20
+  },
+  "human_inputs": {},
+  "metrics": {
+    "codebase.total_loc": {
+      "value": 42000,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.file_count": {
+      "value": 650,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.language_census": {
+      "value": [
+        {
+          "language": "Python",
+          "loc": 38000,
+          "pct": 90.5,
+          "files": 580
+        },
+        {
+          "language": "Shell",
+          "loc": 4000,
+          "pct": 9.5,
+          "files": 70
+        }
+      ],
+      "unit": "per_language",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.distinct_stacks_count": {
+      "value": 2,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.generated_loc_pct": {
+      "value": 1.2,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.largest_file_loc": {
+      "value": 1200,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.avg_file_loc": {
+      "value": 64.6,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.p95_file_loc": {
+      "value": 310,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.history_days": {
+      "value": 2200,
+      "unit": "days",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.commits_last_90d": {
+      "value": 180,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.commits_last_365d": {
+      "value": 720,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.active_authors_last_90d": {
+      "value": 12,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.total_authors": {
+      "value": 45,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.author_concentration_gini": {
+      "value": 0.42,
+      "unit": "gini",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.single_author_file_pct": {
+      "value": 18.0,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.default_branch": {
+      "value": "main",
+      "unit": "",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.branch_count": {
+      "value": 6,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.stale_branch_count": {
+      "value": 1,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.merge_commit_ratio": {
+      "value": 0.35,
+      "unit": "ratio",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.commit_msg_issue_ref_pct": {
+      "value": 72.0,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.hotspots": {
+      "value": [
+        {
+          "path": "src/core/engine.py",
+          "commits_365d": 40,
+          "loc": 800,
+          "authors": 6,
+          "hotspot_score": 32000
+        }
+      ],
+      "unit": "ranked_list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.detected_systems": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "build.containerized": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "build.devcontainer_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "build.one_command_build_documented": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "build.lockfiles_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "build.required_env_var_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "build.external_service_deps": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "build.attempt": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.frameworks_detected": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.test_file_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.test_to_source_ratio": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.coverage_pct": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.coverage_source": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.suite_executes": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.suite_duration_s": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.pass_rate": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.flake_indicators": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.unit_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.integration_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.e2e_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "test.fixture_or_seed_data_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ci.systems_detected": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ci.runs_on_pr": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ci.gates": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ci.success_rate_recent": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ci.avg_duration_s": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "deps.manifest_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "deps.direct_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "deps.transitive_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "deps.duplicate_framework_versions": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "deps.eol_components": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "deps.median_majors_behind": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "deps.known_vuln_count_by_severity": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.parser_coverage_pct": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.module_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.community_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.god_nodes": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.cyclic_dependency_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.avg_fan_out": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.max_fan_out": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "structure.cross_stack_edge_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "debt.analyzer_used": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "debt.violations_total": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "debt.violations_per_kloc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "debt.violations_by_severity": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "debt.todo_fixme_hack_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "debt.baselineable": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "context.readme_quality_score": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "context.adr_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "context.docs_loc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "context.api_spec_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "context.db_schema_docs_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "context.domain_glossary_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "context.ai_context_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ops.deploy_automation_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ops.staging_env_declared": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ops.observability_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ops.feature_flag_system_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "ops.rollback_mechanism_documented": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    }
+  }
+}

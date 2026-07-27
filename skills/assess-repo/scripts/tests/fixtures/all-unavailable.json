@@ -1,0 +1,673 @@
+{
+  "schema_version": "1.0",
+  "rubric_version": "1.0",
+  "assessment_id": "fixture-empty",
+  "generated_at": "2026-07-27T00:00:00Z",
+  "target": {
+    "mode": "local_path",
+    "source": "/tmp/fixture",
+    "resolved_commit": "",
+    "default_branch": "",
+    "history_complete": false,
+    "analyzed_path": "/tmp/fixture",
+    "is_monorepo": false,
+    "detected_projects": [],
+    "submodules": []
+  },
+  "providers": [
+    {
+      "name": "git",
+      "version": "",
+      "status": "unavailable",
+      "reason": "not a git repository"
+    }
+  ],
+  "exclusions": {
+    "patterns": [],
+    "excluded_loc": 0,
+    "excluded_file_count": 0
+  },
+  "human_inputs": {},
+  "metrics": {
+    "codebase.total_loc": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "codebase.file_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "codebase.language_census": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "codebase.distinct_stacks_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "codebase.generated_loc_pct": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "codebase.largest_file_loc": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "codebase.avg_file_loc": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "codebase.p95_file_loc": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.history_days": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.commits_last_90d": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.commits_last_365d": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.active_authors_last_90d": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.total_authors": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.author_concentration_gini": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.single_author_file_pct": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.default_branch": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.branch_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.stale_branch_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.merge_commit_ratio": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.commit_msg_issue_ref_pct": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "vcs.hotspots": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.detected_systems": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.containerized": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.devcontainer_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.one_command_build_documented": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.lockfiles_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.required_env_var_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.external_service_deps": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "build.attempt": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.frameworks_detected": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.test_file_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.test_to_source_ratio": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.coverage_pct": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.coverage_source": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.suite_executes": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.suite_duration_s": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.pass_rate": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.flake_indicators": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.unit_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.integration_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.e2e_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "test.fixture_or_seed_data_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ci.systems_detected": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ci.runs_on_pr": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ci.gates": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ci.success_rate_recent": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ci.avg_duration_s": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "deps.manifest_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "deps.direct_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "deps.transitive_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "deps.duplicate_framework_versions": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "deps.eol_components": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "deps.median_majors_behind": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "deps.known_vuln_count_by_severity": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.parser_coverage_pct": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.module_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.community_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.god_nodes": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.cyclic_dependency_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.avg_fan_out": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.max_fan_out": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "structure.cross_stack_edge_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "debt.analyzer_used": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "debt.violations_total": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "debt.violations_per_kloc": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "debt.violations_by_severity": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "debt.todo_fixme_hack_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "debt.baselineable": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "context.readme_quality_score": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "context.adr_count": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "context.docs_loc": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "context.api_spec_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "context.db_schema_docs_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "context.domain_glossary_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "context.ai_context_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ops.deploy_automation_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ops.staging_env_declared": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ops.observability_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ops.feature_flag_system_present": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "ops.rollback_mechanism_documented": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    }
+  }
+}

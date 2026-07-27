@@ -1,0 +1,691 @@
+{
+  "schema_version": "1.0",
+  "rubric_version": "1.0",
+  "assessment_id": "fixture-gates-pass-no-data",
+  "generated_at": "2026-07-27T00:00:00+00:00",
+  "target": {
+    "mode": "git_url",
+    "source": "https://example.com/org/repo.git",
+    "resolved_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "default_branch": "main",
+    "history_complete": true,
+    "analyzed_path": "/tmp/repo",
+    "is_monorepo": false,
+    "detected_projects": [],
+    "submodules": []
+  },
+  "providers": [
+    {
+      "name": "git",
+      "version": "",
+      "status": "ok",
+      "reason": ""
+    }
+  ],
+  "exclusions": {
+    "patterns": [
+      "node_modules/**"
+    ],
+    "excluded_loc": 500,
+    "excluded_file_count": 20
+  },
+  "human_inputs": {
+    "business_criticality_1_5": 4,
+    "roadmap_demand_next_2q": null,
+    "client_data_policy": {
+      "third_party_tooling_allowed": true,
+      "external_llm_allowed": true,
+      "code_may_leave_premises": false
+    },
+    "sunset_or_replatform_planned": false,
+    "sunset_target_date": null,
+    "domain_expert_available": true,
+    "onboarding_squad_size": 2,
+    "regulatory_or_audit_constraints": null,
+    "collected_at": "2026-07-27T00:00:00+00:00"
+  },
+  "metrics": {
+    "codebase.total_loc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "codebase.file_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "codebase.language_census": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "codebase.distinct_stacks_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "codebase.generated_loc_pct": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "codebase.largest_file_loc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "codebase.avg_file_loc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "codebase.p95_file_loc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.history_days": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.commits_last_90d": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.commits_last_365d": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.active_authors_last_90d": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.total_authors": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.author_concentration_gini": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.single_author_file_pct": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.default_branch": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.branch_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.stale_branch_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.merge_commit_ratio": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.commit_msg_issue_ref_pct": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "vcs.hotspots": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "build.detected_systems": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "build.containerized": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.devcontainer_present": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.one_command_build_documented": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.lockfiles_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "build.required_env_var_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "build.external_service_deps": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "build.attempt": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.frameworks_detected": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.test_file_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.test_to_source_ratio": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.coverage_pct": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.coverage_source": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.suite_executes": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.suite_duration_s": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.pass_rate": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.flake_indicators": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.unit_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.integration_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.e2e_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "test.fixture_or_seed_data_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ci.systems_detected": {
+      "value": [
+        "github-actions"
+      ],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ci.runs_on_pr": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ci.gates": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ci.success_rate_recent": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ci.avg_duration_s": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "deps.manifest_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "deps.direct_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "deps.transitive_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "deps.duplicate_framework_versions": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "deps.eol_components": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "deps.median_majors_behind": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "deps.known_vuln_count_by_severity": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.parser_coverage_pct": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.module_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.community_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.god_nodes": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.cyclic_dependency_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.avg_fan_out": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.max_fan_out": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "structure.cross_stack_edge_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "debt.analyzer_used": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "debt.violations_total": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "debt.violations_per_kloc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "debt.violations_by_severity": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "debt.todo_fixme_hack_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "debt.baselineable": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "context.readme_quality_score": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "context.adr_count": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "context.docs_loc": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "context.api_spec_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "context.db_schema_docs_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "context.domain_glossary_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "context.ai_context_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ops.deploy_automation_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ops.staging_env_declared": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ops.observability_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ops.feature_flag_system_present": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "ops.rollback_mechanism_documented": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    }
+  }
+}

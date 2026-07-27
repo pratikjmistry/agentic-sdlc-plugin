@@ -1,0 +1,666 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-sdlc-plugin/skills/assess-repo/assessment-inputs.schema.json",
+  "title": "assessment-inputs",
+  "description": "Raw normalized metrics with provenance, produced by scripts/collect.py for a single repository assessment. Consumed by scripts/score.py.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "rubric_version",
+    "assessment_id",
+    "generated_at",
+    "target",
+    "providers",
+    "exclusions",
+    "human_inputs",
+    "metrics"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "metricEnvelope": {
+      "type": "object",
+      "required": [
+        "value",
+        "unit",
+        "source",
+        "confidence",
+        "coverage_pct",
+        "notes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "The metric's value. null when confidence is 'unavailable'. Shape varies by metric (scalar, array, or object) \u2014 see references/schema.md."
+        },
+        "unit": {
+          "type": "string",
+          "description": "e.g. 'loc', 'days', 'pct', 'count', 'ratio', 'seconds', or '' for unitless/enum/object values."
+        },
+        "source": {
+          "type": "string",
+          "description": "Provider name that produced this value, e.g. 'git', 'tokei', 'graphify', or '' if unavailable."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "measured",
+            "derived",
+            "estimated",
+            "unavailable"
+          ]
+        },
+        "coverage_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Share of the codebase/history this value actually covers. null only when confidence is 'unavailable'."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-text caveats, e.g. why coverage is partial or what a derived value was computed from."
+        }
+      },
+      "if": {
+        "properties": {
+          "confidence": {
+            "const": "unavailable"
+          }
+        },
+        "required": [
+          "confidence"
+        ]
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "const": null
+          },
+          "coverage_pct": {
+            "const": null
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "value": {
+            "not": {
+              "const": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "rubric_version": {
+      "type": "string",
+      "description": "Version of the rubric.yaml this run's collection targets. score.py must refuse to run a mismatched major version silently."
+    },
+    "assessment_id": {
+      "type": "string",
+      "description": "Unique ID for this run, e.g. '<repo-slug>-<shortsha>-<timestamp>'."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "mode",
+        "source",
+        "resolved_commit",
+        "default_branch",
+        "history_complete",
+        "analyzed_path",
+        "is_monorepo",
+        "detected_projects",
+        "submodules"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "git_url",
+            "local_path"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "resolved_commit": {
+          "type": "string",
+          "description": "'' if not a git repository."
+        },
+        "default_branch": {
+          "type": "string"
+        },
+        "history_complete": {
+          "type": "boolean",
+          "description": "false when --depth was used or the target has no git history at all."
+        },
+        "analyzed_path": {
+          "type": "string"
+        },
+        "is_monorepo": {
+          "type": "boolean"
+        },
+        "detected_projects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "stack",
+              "build_entrypoint"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "stack": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "build_entrypoint": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "submodules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "version",
+          "status",
+          "reason"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "unavailable",
+              "skipped_by_policy",
+              "failed"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "exclusions": {
+      "type": "object",
+      "required": [
+        "patterns",
+        "excluded_loc",
+        "excluded_file_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excluded_loc": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded_file_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "human_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "business_criticality_1_5": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "roadmap_demand_next_2q": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "heavy",
+            null
+          ]
+        },
+        "client_data_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "third_party_tooling_allowed": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "external_llm_allowed": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "code_may_leave_premises": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        },
+        "sunset_or_replatform_planned": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "sunset_target_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "domain_expert_available": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "onboarding_squad_size": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "regulatory_or_audit_constraints": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collected_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "codebase.total_loc",
+        "codebase.file_count",
+        "codebase.language_census",
+        "codebase.distinct_stacks_count",
+        "codebase.generated_loc_pct",
+        "codebase.largest_file_loc",
+        "codebase.avg_file_loc",
+        "codebase.p95_file_loc",
+        "vcs.history_days",
+        "vcs.commits_last_90d",
+        "vcs.commits_last_365d",
+        "vcs.active_authors_last_90d",
+        "vcs.total_authors",
+        "vcs.author_concentration_gini",
+        "vcs.single_author_file_pct",
+        "vcs.default_branch",
+        "vcs.branch_count",
+        "vcs.stale_branch_count",
+        "vcs.merge_commit_ratio",
+        "vcs.commit_msg_issue_ref_pct",
+        "vcs.hotspots",
+        "build.detected_systems",
+        "build.containerized",
+        "build.devcontainer_present",
+        "build.one_command_build_documented",
+        "build.lockfiles_present",
+        "build.required_env_var_count",
+        "build.external_service_deps",
+        "build.attempt",
+        "test.frameworks_detected",
+        "test.test_file_count",
+        "test.test_to_source_ratio",
+        "test.coverage_pct",
+        "test.coverage_source",
+        "test.suite_executes",
+        "test.suite_duration_s",
+        "test.pass_rate",
+        "test.flake_indicators",
+        "test.unit_present",
+        "test.integration_present",
+        "test.e2e_present",
+        "test.fixture_or_seed_data_present",
+        "ci.systems_detected",
+        "ci.runs_on_pr",
+        "ci.gates",
+        "ci.success_rate_recent",
+        "ci.avg_duration_s",
+        "deps.manifest_count",
+        "deps.direct_count",
+        "deps.transitive_count",
+        "deps.duplicate_framework_versions",
+        "deps.eol_components",
+        "deps.median_majors_behind",
+        "deps.known_vuln_count_by_severity",
+        "structure.parser_coverage_pct",
+        "structure.module_count",
+        "structure.community_count",
+        "structure.god_nodes",
+        "structure.cyclic_dependency_count",
+        "structure.avg_fan_out",
+        "structure.max_fan_out",
+        "structure.cross_stack_edge_count",
+        "debt.analyzer_used",
+        "debt.violations_total",
+        "debt.violations_per_kloc",
+        "debt.violations_by_severity",
+        "debt.todo_fixme_hack_count",
+        "debt.baselineable",
+        "context.readme_quality_score",
+        "context.adr_count",
+        "context.docs_loc",
+        "context.api_spec_present",
+        "context.db_schema_docs_present",
+        "context.domain_glossary_present",
+        "context.ai_context_present",
+        "ops.deploy_automation_present",
+        "ops.staging_env_declared",
+        "ops.observability_present",
+        "ops.feature_flag_system_present",
+        "ops.rollback_mechanism_documented"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "codebase.total_loc": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "codebase.file_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "codebase.language_census": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "codebase.distinct_stacks_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "codebase.generated_loc_pct": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "codebase.largest_file_loc": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "codebase.avg_file_loc": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "codebase.p95_file_loc": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.history_days": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.commits_last_90d": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.commits_last_365d": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.active_authors_last_90d": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.total_authors": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.author_concentration_gini": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.single_author_file_pct": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.default_branch": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.branch_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.stale_branch_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.merge_commit_ratio": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.commit_msg_issue_ref_pct": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "vcs.hotspots": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.detected_systems": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.containerized": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.devcontainer_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.one_command_build_documented": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.lockfiles_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.required_env_var_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.external_service_deps": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "build.attempt": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.frameworks_detected": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.test_file_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.test_to_source_ratio": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.coverage_pct": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.coverage_source": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.suite_executes": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.suite_duration_s": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.pass_rate": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.flake_indicators": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.unit_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.integration_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.e2e_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "test.fixture_or_seed_data_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ci.systems_detected": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ci.runs_on_pr": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ci.gates": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ci.success_rate_recent": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ci.avg_duration_s": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "deps.manifest_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "deps.direct_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "deps.transitive_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "deps.duplicate_framework_versions": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "deps.eol_components": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "deps.median_majors_behind": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "deps.known_vuln_count_by_severity": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.parser_coverage_pct": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.module_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.community_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.god_nodes": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.cyclic_dependency_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.avg_fan_out": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.max_fan_out": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "structure.cross_stack_edge_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "debt.analyzer_used": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "debt.violations_total": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "debt.violations_per_kloc": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "debt.violations_by_severity": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "debt.todo_fixme_hack_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "debt.baselineable": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "context.readme_quality_score": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "context.adr_count": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "context.docs_loc": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "context.api_spec_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "context.db_schema_docs_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "context.domain_glossary_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "context.ai_context_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ops.deploy_automation_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ops.staging_env_declared": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ops.observability_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ops.feature_flag_system_present": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "ops.rollback_mechanism_documented": {
+          "$ref": "#/$defs/metricEnvelope"
+        }
+      }
+    }
+  }
+}

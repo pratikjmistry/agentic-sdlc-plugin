@@ -1,0 +1,740 @@
+{
+  "schema_version": "1.0",
+  "rubric_version": "1.0",
+  "assessment_id": "fixture-sparse-legacy",
+  "generated_at": "2026-07-27T00:00:00+00:00",
+  "target": {
+    "mode": "git_url",
+    "source": "https://example.com/org/repo.git",
+    "resolved_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "default_branch": "main",
+    "history_complete": true,
+    "analyzed_path": "/tmp/repo",
+    "is_monorepo": false,
+    "detected_projects": [],
+    "submodules": []
+  },
+  "providers": [
+    {
+      "name": "git",
+      "version": "",
+      "status": "ok",
+      "reason": ""
+    }
+  ],
+  "exclusions": {
+    "patterns": [
+      "node_modules/**"
+    ],
+    "excluded_loc": 500,
+    "excluded_file_count": 20
+  },
+  "human_inputs": {
+    "business_criticality_1_5": 4,
+    "roadmap_demand_next_2q": "moderate",
+    "client_data_policy": {
+      "third_party_tooling_allowed": true,
+      "external_llm_allowed": true,
+      "code_may_leave_premises": false
+    },
+    "sunset_or_replatform_planned": false,
+    "sunset_target_date": null,
+    "domain_expert_available": true,
+    "onboarding_squad_size": 2,
+    "regulatory_or_audit_constraints": null,
+    "collected_at": "2026-07-27T00:00:00+00:00"
+  },
+  "metrics": {
+    "codebase.total_loc": {
+      "value": 42000,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.file_count": {
+      "value": 650,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.language_census": {
+      "value": [
+        {
+          "language": "Python",
+          "loc": 38000,
+          "pct": 90.5,
+          "files": 580
+        },
+        {
+          "language": "Shell",
+          "loc": 4000,
+          "pct": 9.5,
+          "files": 70
+        }
+      ],
+      "unit": "per_language",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.distinct_stacks_count": {
+      "value": 5,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.generated_loc_pct": {
+      "value": 1.2,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.largest_file_loc": {
+      "value": 1200,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.avg_file_loc": {
+      "value": 64.6,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "codebase.p95_file_loc": {
+      "value": 310,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.history_days": {
+      "value": 2200,
+      "unit": "days",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.commits_last_90d": {
+      "value": 180,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.commits_last_365d": {
+      "value": 720,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.active_authors_last_90d": {
+      "value": 12,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.total_authors": {
+      "value": 45,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.author_concentration_gini": {
+      "value": 0.42,
+      "unit": "gini",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.single_author_file_pct": {
+      "value": 18.0,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.default_branch": {
+      "value": "main",
+      "unit": "",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.branch_count": {
+      "value": 6,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.stale_branch_count": {
+      "value": 1,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.merge_commit_ratio": {
+      "value": 0.35,
+      "unit": "ratio",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.commit_msg_issue_ref_pct": {
+      "value": 72.0,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "vcs.hotspots": {
+      "value": [
+        {
+          "path": "src/core/engine.py",
+          "commits_365d": 40,
+          "loc": 800,
+          "authors": 6,
+          "hotspot_score": 32000
+        }
+      ],
+      "unit": "ranked_list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.detected_systems": {
+      "value": [
+        "msbuild"
+      ],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.containerized": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.devcontainer_present": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.one_command_build_documented": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.lockfiles_present": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.required_env_var_count": {
+      "value": 2,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.external_service_deps": {
+      "value": [
+        "postgres"
+      ],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "build.attempt": {
+      "value": {
+        "attempted": false,
+        "exit_code": null,
+        "duration_s": null,
+        "stderr_tail": ""
+      },
+      "unit": "object",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.frameworks_detected": {
+      "value": [
+        "pytest"
+      ],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.test_file_count": {
+      "value": 0,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.test_to_source_ratio": {
+      "value": 0.36,
+      "unit": "ratio",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.coverage_pct": {
+      "value": null,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "no test suite to measure coverage from"
+    },
+    "test.coverage_source": {
+      "value": "coverage.py",
+      "unit": "",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.suite_executes": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.suite_duration_s": {
+      "value": 95.0,
+      "unit": "seconds",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.pass_rate": {
+      "value": 99.5,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.flake_indicators": {
+      "value": 0,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.unit_present": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.integration_present": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.e2e_present": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "test.fixture_or_seed_data_present": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ci.systems_detected": {
+      "value": [],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ci.runs_on_pr": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ci.gates": {
+      "value": {
+        "lint": true,
+        "test": true,
+        "coverage": true,
+        "security": true,
+        "build": true
+      },
+      "unit": "object",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ci.success_rate_recent": {
+      "value": 96.0,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ci.avg_duration_s": {
+      "value": 420.0,
+      "unit": "seconds",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "deps.manifest_count": {
+      "value": 1,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "deps.direct_count": {
+      "value": 28,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "deps.transitive_count": {
+      "value": 140,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "deps.duplicate_framework_versions": {
+      "value": [
+        "React 16",
+        "React 18"
+      ],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "deps.eol_components": {
+      "value": [],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "deps.median_majors_behind": {
+      "value": 0,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "deps.known_vuln_count_by_severity": {
+      "value": {
+        "critical": 0,
+        "high": 0,
+        "medium": 1,
+        "low": 3
+      },
+      "unit": "object",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "structure.parser_coverage_pct": {
+      "value": 35.0,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": "legacy VB6 modules unsupported by tree-sitter grammar"
+    },
+    "structure.module_count": {
+      "value": 48,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "structure.community_count": {
+      "value": 6,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "structure.god_nodes": {
+      "value": [],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "structure.cyclic_dependency_count": {
+      "value": 0,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "structure.avg_fan_out": {
+      "value": 3.1,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "structure.max_fan_out": {
+      "value": 14,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "structure.cross_stack_edge_count": {
+      "value": 0,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "debt.analyzer_used": {
+      "value": "ruff+semgrep",
+      "unit": "",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "debt.violations_total": {
+      "value": 80,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "debt.violations_per_kloc": {
+      "value": 65.0,
+      "unit": "ratio",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "debt.violations_by_severity": {
+      "value": {
+        "critical": 0,
+        "high": 2,
+        "medium": 30,
+        "low": 48
+      },
+      "unit": "object",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "debt.todo_fixme_hack_count": {
+      "value": 35,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "debt.baselineable": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "context.readme_quality_score": {
+      "value": 20.0,
+      "unit": "pct",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "context.adr_count": {
+      "value": 0,
+      "unit": "count",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "context.docs_loc": {
+      "value": 3000,
+      "unit": "loc",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "context.api_spec_present": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "context.db_schema_docs_present": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "context.domain_glossary_present": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "context.ai_context_present": {
+      "value": false,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ops.deploy_automation_present": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ops.staging_env_declared": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ops.observability_present": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ops.feature_flag_system_present": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "ops.rollback_mechanism_documented": {
+      "value": true,
+      "unit": "bool",
+      "source": "fixture",
+      "confidence": "measured",
+      "coverage_pct": 100,
+      "notes": ""
+    }
+  }
+}

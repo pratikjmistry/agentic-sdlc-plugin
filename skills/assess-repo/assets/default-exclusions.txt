@@ -1,0 +1,94 @@
+# Default exclusion patterns for /assess-repo.
+#
+# One glob pattern per line (fnmatch-style, matched against the path relative
+# to the repo root, POSIX separators). Blank lines and lines starting with #
+# are ignored. Prefix a pattern with "generated:" to mark it as generated code
+# specifically — these are still excluded from all codebase.* counts like
+# every other exclusion, but are ALSO tracked separately so
+# codebase.generated_loc_pct can report how much of the raw repository is
+# generated, as opposed to vendored/build-output/binary noise.
+#
+# Extend this per-repo by passing your own file and letting the skill merge it
+# with this default list — never edit this file to special-case one repo.
+
+# --- vendored / third-party ---
+node_modules/**
+vendor/**
+third_party/**
+third-party/**
+.venv/**
+venv/**
+env/**
+site-packages/**
+packages/**
+bower_components/**
+
+# --- build output / caches ---
+dist/**
+build/**
+out/**
+target/**
+bin/**
+obj/**
+.next/**
+.nuxt/**
+.cache/**
+coverage/**
+*.egg-info/**
+
+# --- lockfiles that inflate LOC without being hand-written code ---
+# Enumerated for clarity/documentation, plus a blanket *.lock catch-all since
+# every ecosystem's lockfile format is machine-generated and new ones appear
+# faster than any enumerated list can track (uv.lock is the example that
+# surfaced this gap during the Flask dry run — a bare *.lock wasn't in the
+# original list, so it inflated total_loc and topped the hotspot ranking).
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+Gemfile.lock
+poetry.lock
+Cargo.lock
+composer.lock
+uv.lock
+*.lock
+
+# --- minified / bundled assets ---
+*.min.js
+*.min.css
+*.bundle.js
+*.map
+
+# --- migrations (schema history, not hand-authored logic in the usual sense) ---
+**/migrations/**
+**/Migrations/**
+db/migrate/**
+
+# --- generated code: general ---
+generated:**/*.generated.*
+generated:**/*_generated.*
+generated:**/*_pb2.py
+generated:**/*.pb.go
+generated:**/generated/**
+
+# --- generated code: legacy .NET ---
+generated:*.designer.cs
+generated:*.Designer.cs
+generated:*.g.cs
+generated:*.g.i.cs
+generated:*.Designer.vb
+generated:*.designer.vb
+generated:**/*.edmx.cs
+generated:**/*.edmx.diagram
+generated:**/*.dbml.layout
+generated:**/Reference.cs
+generated:**/*.wsdl.cs
+generated:**/ServiceReference*/**
+generated:**/*.tt.cs
+
+# --- version control / tooling internals ---
+.git/**
+.svn/**
+.hg/**
+.idea/**
+.vs/**
+.vscode/**
