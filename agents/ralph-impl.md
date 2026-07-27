@@ -143,6 +143,10 @@ From the PMS, fetch the full issue body. Extract:
 - Feature reference (e.g. `F-03-auth`)
 - Dependency list (verify all blocking ones are closed)
 - Database spec section (for DB-layer issues)
+- **UI Design Reference section** (for UI-layer issues) — Screen ID (`SCR-NNN`), Component ID(s)
+  (`CMP-NNN`), mockup path, and layout/style notes. Written by `/feature-to-issues` from
+  `/design-ui`'s output when that step ran for this feature. If this section says "No UI design
+  available" instead, there is no approved mockup to build against — see IMPL-3's UI fallback.
 
 Load the feature doc and test plan via QMD (preferred) or direct read (fallback):
 ```
@@ -158,6 +162,20 @@ Read docs/test-plan.md
 ```
 
 Extract all UT- IDs assigned to this issue from `docs/test-plan.md` — you must cover every one.
+
+**For UI-layer issues with a UI Design Reference section**, also load the approved design before
+implementing anything:
+```
+# QMD preferred:
+qmd get "ai-context/ui-design.md"
+
+# Fallback:
+Read ai-context/ui-design.md
+```
+Then `Read` the mockup file itself at the path named in the issue (e.g.
+`docs/design/mockups/SCR-001-task-board.html`) — this is a real, rendered HTML/CSS file, not a
+description; it shows the actual approved layout, navigation, and per-state behavior. See IMPL-3 for
+how to use both.
 
 ---
 
@@ -199,10 +217,29 @@ Layer-specific rules:
 
 **API:** Match the contract in the issue and `ai-context/architecture.md`. Each service reads only its own DB. Follow error handling patterns from `coding-standards.md`.
 
-**UI:** Follow component structure and naming from `coding-standards.md`. Query QMD for `ai-context/design-system.md` if it exists:
+**UI:** If IMPL-1 found a UI Design Reference section on this issue, the referenced mockup is
+**authoritative for this screen** — its layout, navigation, component placement, copy, and per-state
+behavior (empty/loading/error/populated, and any modal/tab/toggle interactions it wires up) are the
+approved design, not a suggestion to reinterpret. Implement to match what the mockup actually shows and
+does, cross-referenced against its Screen Detail entry in `ai-context/ui-design.md` (Primary Actions,
+States, Data Displayed) for anything the static HTML doesn't make obvious. Do not invent a different
+layout, navigation structure, or interaction pattern than what the mockup already demonstrates — if the
+Acceptance Criteria and the mockup seem to disagree, flag it rather than silently picking one.
+
+`ai-context/design-system.md` (if present) governs *how* to build it in this codebase's real component
+library — actual component names/props, token values, accessibility baseline — since the mockup's plain
+HTML/CSS only approximates that library. The mockup tells you what the screen looks like and does;
+`design-system.md` and `coding-standards.md` tell you how to build it with this project's real
+components. Query QMD for both:
 ```
+qmd get "ai-context/ui-design.md"
 qmd query "design system component [component-name]"
 ```
+
+**If the issue has no UI Design Reference section** (an older project, or `/design-ui` was skipped for
+this feature): fall back to `coding-standards.md`'s component structure/naming conventions and the
+issue's Acceptance Criteria alone, and note in the PR description that no approved mockup existed to
+build against — a reviewer should know that gap rather than assume one was followed.
 
 **INT:** Wire up the full user-facing flow. Verify it works end-to-end locally. **Never** wire an E2E/Playwright/Cypress job into the CI pipeline's `on: push` / `on: pull_request` triggers — E2E runs only via a separate, manually-triggered workflow. See `ai-context/testing.md` — E2E Test Trigger Model.
 

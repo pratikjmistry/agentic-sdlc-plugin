@@ -85,6 +85,10 @@ For each agent type, define what it must read before starting work:
 - `ai-context/repo-structure.md` — branch/PR conventions, PR target (see Promotion Model above if tiered)
 - `ai-context/database-guidelines.md` — naming, ID strategy, migration tooling (for DB issues)
 - The feature file `docs/features/F-XX-slug.md` — acceptance criteria and entity ownership
+- `ai-context/ui-design.md` and the referenced mockup under `docs/design/mockups/` (for UI issues,
+  when `/design-ui` ran for this feature) — the approved screen layout, navigation, and per-state
+  behavior is authoritative; `design-system.md`/`coding-standards.md` govern how to build it in this
+  project's real component library
 
 **Ralph-test inputs:**
 - The assigned TEST issue
