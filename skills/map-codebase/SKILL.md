@@ -106,9 +106,14 @@ proceed anyway; `/map-codebase` doesn't require `/assess-repo` to have run.
 
 ### Step 1 — Ensure Graphify is available
 
-Check `shutil.which("graphify")`. If absent, tell the user plainly and offer to run
-`uv tool install graphifyy` — state that this installs a CLI tool, don't do it silently. If the user
-declines or `uv` isn't available either, halt with the manual install command.
+Follow `skills/assess-repo/references/optional-tools.md`'s standard protocol (shared across every skill in
+this plugin that shells out to an optional tool — read it if this is the first time you're running this
+step). In short: check `shutil.which("graphify")`; if absent, explain that this skill's entire output
+depends on it (Graphify is closer to required than optional here — there's no in-house fallback the way
+`/assess-repo`'s language census has one) and ask before running `uv tool install graphifyy` (or
+`pip install graphifyy` if `uv` isn't on PATH either). Never install silently, and never prompt at all in
+an unattended/scripted invocation — halt with the manual install command instead. If the user declines,
+halt; there is no meaningful degraded mode for this skill without Graphify.
 
 ### Step 2 — Extract
 
@@ -207,3 +212,5 @@ itself, or explore directly with `graphify query "<question>"` / `graphify expla
   changes)
 - `references/entry-point-heuristics.md` — the zero-fan-in heuristic's known false positives/negatives per
   language, and what to do about them
+- `skills/assess-repo/references/optional-tools.md` — the shared check-explain-ask protocol for installing
+  Graphify (and any other optional tool this plugin's skills use)

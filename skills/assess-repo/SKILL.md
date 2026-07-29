@@ -214,7 +214,18 @@ is skipped with `status: "skipped_by_policy"` and a recorded reason in `provider
 Run the `AskUserQuestion` batch(es) above if not already supplied via config. Record raw answers into
 `human_inputs`.
 
-### Step 2 — Collect Layer 1 + Layer 2 metrics
+### Step 2 — Check optional tools before collecting
+
+Before running `collect.py`, check for Graphify (`shutil.which("graphify")`), semgrep, and ruff — the
+three optional tools whose absence fully blocks a metric family rather than just degrading it (tokei/scc/
+cloc are lower-priority to prompt about; language census always has a working in-house fallback). Follow
+`references/optional-tools.md`'s protocol exactly: if a tool is missing, explain what it unlocks and ask
+before installing — never install silently, and never prompt at all in an unattended/scripted run (skip
+straight to degraded mode there). This step is skipped entirely under `--quick`, since asking installation
+questions mid-portfolio-sweep defeats the point of a fast pass — a quick run always proceeds in whatever
+degraded mode the currently-installed tools allow.
+
+### Step 3 — Collect Layer 1 + Layer 2 metrics
 
 Run `scripts/collect.py`, which builds the exclusion set, then dispatches to each provider in
 `scripts/providers/` (git history, language census, build probe, test probe, CI probe, deps probe, debt
@@ -227,7 +238,7 @@ defensive-but-unverified (Graphify, semgrep/ruff).
 Validate the result against the schema before proceeding (`scripts/validate.py`). Save
 `assessment-inputs.json` to `--out`.
 
-### Step 3 — Score
+### Step 4 — Score
 
 Run `scripts/score.py` against `assessment-inputs.json` and `assets/rubric.yaml` (or `--rubric` override).
 This is a pure function — no model call, no network access. It evaluates the five hard gates, computes the
@@ -238,7 +249,7 @@ evidence gate required to advance one level. Save `assessment-scores.json` to `-
 **Do not narrate a verdict differently from what `assessment-scores.json` says.** If the agent's prose in
 the eventual report disagrees with the computed verdict, the report is wrong, not the score.
 
-### Step 4 — Zone carving
+### Step 5 — Zone carving
 
 Handled inside `scripts/render.py`'s `carve_zones`: groups `vcs.hotspots` by the first two path segments
 (a package/module boundary, not the immediate parent directory — see `render.py`'s comments for why), skips
@@ -246,7 +257,7 @@ root-level scattered files entirely (they aren't a cohesive code area), and rank
 churn x size. `coupling_score` and `blast_radius` stay `null`/`"unknown"` until Phase 2's real dependency
 graph exists — Phase 0 only has hotspot ranking to carve with, not a real coupling signal.
 
-### Step 5 — Render narrative outputs
+### Step 6 — Render narrative outputs
 
 Run `scripts/render.py <out_dir>` to produce `agent-readiness-report.md`, `remediation-plan.md`,
 `zones.json`, and append a row to `portfolio.csv`. This step only narrates what
@@ -290,3 +301,4 @@ Full schemas: `assessment-inputs.json` in `references/schema.md` (mirrors `scrip
 - `references/rubric-design.md` — rationale for gate thresholds, dimension weights, and scoring bands
 - `references/provider-adapters.md` — how to add a new Layer 1/2 provider
 - `references/legacy-stack-notes.md` — per legacy stack (WebForms, VB6, classic ASP, PL/SQL, older Delphi), which metrics degrade and the fallback heuristic
+- `references/optional-tools.md` — the standard check-explain-ask protocol for optional external tools (Graphify, semgrep, ruff, tokei/scc/cloc); shared with `/map-codebase`
