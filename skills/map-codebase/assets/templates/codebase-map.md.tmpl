@@ -1,0 +1,59 @@
+# Codebase Map — $repo_name
+
+**Generated:** $generated_at | **Commit:** $short_sha | **Extraction mode:** $extraction_mode
+
+---
+
+## Overview
+
+| | |
+|---|---|
+| **Nodes** | $node_count |
+| **Edges** | $edge_count |
+| **Communities** | $community_count |
+| **Files covered** | $files_covered |
+| **Cyclic dependency groups** | $cycle_count |
+
+> Built from `graphify-out/graph.json` — this is a real, deterministic AST-derived graph, not a model's
+> guess at your architecture. Fields Graphify doesn't report directly (cycles, entry points, fan_in/out
+> split, community names) are computed in-house — see `references/graph-schema.md` for exactly which.
+
+---
+
+## Candidate Entry Points
+
+$entry_points_section
+
+---
+
+## Modules / Communities
+
+$communities_section
+
+---
+
+## Architectural Hubs
+
+$hubs_section
+
+---
+
+## Hidden Coupling ("Surprises")
+
+$surprises_section
+
+---
+
+## Cyclic Dependencies
+
+$cycles_section
+
+---
+
+## Next Steps
+
+- `/discover-constitution` (not yet built) would read this map to draft `ai-context/` from the code itself
+  rather than a human interview.
+- Explore directly: `graphify query "<question>"`, `graphify explain "<symbol>"`,
+  `graphify affected "<symbol>"` — all read `graphify-out/graph.json` without re-extracting.
+- `graphify tree` / `graphify export callflow-html` for a visual, if the tabular view above isn't enough.

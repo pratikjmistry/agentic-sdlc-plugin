@@ -80,7 +80,9 @@ repo mostly contradicts. This pathway triages first:
 /agentic-sdlc:assess-repo <git-url-or-path>  → Phase 0: score agent-readiness, verdict + trust level
   ↓ ONBOARD_NOW / ONBOARD_AFTER_REMEDIATION / DEFER / DO_NOT_ONBOARD
 Phase 1  → autonomy floor (reproducible build + verifiable test signal)
-Phase 2  → reverse-engineer context (/map-codebase, /discover-constitution, /generate-zone-context)
+/agentic-sdlc:map-codebase <git-url-or-path>  → Phase 2: real dependency graph via Graphify,
+  ↓                                              module/hub/hidden-coupling synthesis, zone refresh
+Phase 2 (cont.)  → /discover-constitution, /generate-zone-context
 Phase 3  → /characterize — characterization test harness
 Phase 4  → /baseline-debt — debt baseline + ratchet
 Phase 5  → /plan-seams — seam creation, lazy, per-zone
@@ -88,10 +90,18 @@ Phase 6  → graduated autonomy per zone (trust levels L0–L4)
 Phase 7  → /verify-context — context drift detection in CI
 ```
 
-Only Phase 0 (`/assess-repo`) is implemented today — it's a deterministic scoring pass (no model call
-computes a score), cheap enough to run across a 20–40 repo portfolio, and it's the gate that decides
-whether the rest of this pathway is worth investing in for a given repo at all. Phases 1–7 are the planned
-next phases of this pathway, not yet built.
+Phase 0 (`/assess-repo`) and part of Phase 2 (`/map-codebase`) are implemented today. `/assess-repo` is a
+deterministic scoring pass (no model call computes a score), cheap enough to run across a 20–40 repo
+portfolio, and it's the gate that decides whether the rest of this pathway is worth investing in for a
+given repo at all — run `/map-codebase` (or anything past it) on a repo it flagged `DEFER`/
+`DO_NOT_ONBOARD` and you're spending real time on a repo that likely isn't worth it. `/map-codebase` builds
+the real dependency graph via [Graphify](https://pypi.org/project/graphifyy/) (`uv tool install
+graphifyy`) — deterministic tree-sitter AST extraction, no LLM calls by default — and synthesizes it into
+a human-readable `docs/codebase-map.md` (module/community boundaries, architectural hubs, hidden
+cross-module coupling, circular dependencies, candidate entry points), plus refreshes `/assess-repo`'s
+`zones.json` with real coupling data now that an actual graph exists. `/discover-constitution` and
+`/generate-zone-context` (Phase 2's other two named skills) and Phases 1, 3–7 are the planned next steps
+of this pathway, not yet built.
 
 ### Ralph implementation loop (after issues are in PMS)
 
@@ -117,6 +127,7 @@ claude --agent agentic-sdlc:ralph-e2e       → Write E2E tests against staging 
 | Feature to Issues | `/agentic-sdlc:feature-to-issues` | Decomposes features into atomic, dependency-ordered issues |
 | Push to PMS | `/agentic-sdlc:push-to-pms` | Creates issues in your chosen project management platform |
 | Assess Repo | `/agentic-sdlc:assess-repo` | Brownfield Phase 0 — deterministically scores a repo's agent-readiness (git/build/test/CI/deps/debt/structure), gives a verdict, trust level, and pilot zone |
+| Map Codebase | `/agentic-sdlc:map-codebase` | Brownfield Phase 2 — builds a real dependency graph via Graphify, synthesizes modules/hubs/hidden coupling/cycles into `docs/codebase-map.md`, refreshes zone coupling data |
 
 ---
 
