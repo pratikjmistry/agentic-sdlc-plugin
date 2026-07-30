@@ -36,7 +36,7 @@ data" a checkable property, not a convention people forget.
 | `providers` | One entry per provider that was invoked or considered, with its outcome. |
 | `exclusions` | The exclusion set applied before any counting, and what it removed. |
 | `human_inputs` | Business context only a human can supply — see below. |
-| `metrics` | All 80 required metric IDs, each as an envelope above. |
+| `metrics` | All 82 required metric IDs, each as an envelope above. |
 
 ### `target`
 
@@ -44,7 +44,12 @@ data" a checkable property, not a convention people forget.
 target isn't a git repository at all (degrade, don't crash). `history_complete` is `false` whenever
 `--depth` was used — every metric that depends on full history must then report itself
 `confidence: "unavailable"` and say why in `notes`, rather than compute a number from partial history and
-present it as reliable. `detected_projects` is non-empty only for monorepos.
+present it as reliable. `detected_projects` is populated by grouping manifest-bearing files
+(`package.json`, `pyproject.toml`, `go.mod`, `*.csproj`, etc. — the same marker lists
+`build_probe.py`/`deps_probe.py` already use) by containing directory; `is_monorepo` is true when more
+than one such directory is found. **Known false-positive**: a manifest nested under `examples/` or
+`test/fixtures/` counts as a project candidate too — this is a cheap heuristic, not a real workspace-tool
+reader (no `pnpm-workspace.yaml`/`lerna.json`/`nx.json` awareness yet).
 
 ### `providers`
 
@@ -98,6 +103,13 @@ Grouped by family (the dot prefix, e.g. `vcs.hotspots`, is part of the metric ID
   `feature_flag_system_present`, `rollback_mechanism_documented`. `staging_env_declared` is a hard input
   to the L4 trust-level gate, because `ralph-e2e` writes tests against staging — no declared staging
   environment caps a zone at L3 regardless of every other metric.
+- **`architecture.*`** (2): `detected_patterns`, `style_summary`. Phase-0 cheap heuristic only —
+  directory-naming (e.g. `controllers/`+`models/`+`views/` → MVC) and dependency-convention signals
+  (e.g. redux/vuex present → Flux-style state management), always `confidence: "estimated"`, never
+  higher. **Not** wired into any `rubric.yaml` dimension — purely informational for the report's
+  Quantitative Codebase Overview, and not a substitute for `/map-codebase`'s real dependency-graph
+  analysis. `detected_patterns`'s value is an array of `{pattern, confidence, evidence}`; `style_summary`
+  is a short label (or an explicit "inconclusive" value when nothing matched).
 
 ## Validation
 

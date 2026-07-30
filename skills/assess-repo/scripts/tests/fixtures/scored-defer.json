@@ -743,6 +743,28 @@
       "confidence": "measured",
       "coverage_pct": 100,
       "notes": ""
+    },
+    "architecture.detected_patterns": {
+      "value": [
+        {
+          "pattern": "Layered / Repository",
+          "confidence": "estimated",
+          "evidence": "both services/ and repositories/ directories present"
+        }
+      ],
+      "unit": "list",
+      "source": "fixture",
+      "confidence": "estimated",
+      "coverage_pct": 100,
+      "notes": ""
+    },
+    "architecture.style_summary": {
+      "value": "Layered / Repository",
+      "unit": "",
+      "source": "fixture",
+      "confidence": "estimated",
+      "coverage_pct": 100,
+      "notes": ""
     }
   }
 }

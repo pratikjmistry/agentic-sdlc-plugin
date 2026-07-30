@@ -686,6 +686,22 @@
       "confidence": "unavailable",
       "coverage_pct": null,
       "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "architecture.detected_patterns": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
+    },
+    "architecture.style_summary": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "withheld to isolate the weighted_score=None branch"
     }
   }
 }

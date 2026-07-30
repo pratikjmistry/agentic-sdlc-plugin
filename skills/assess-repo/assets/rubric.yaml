@@ -76,6 +76,10 @@ dimensions:
       - build.one_command_build_documented
       - build.detected_systems
       - build.lockfiles_present
+    remediation: >
+      Add a Dockerfile/devcontainer and document a one-command build path (a README build section, or a
+      bare Makefile target), or re-run this assessment with --attempt-build inside a disposable container
+      for a real (rather than detect-only) signal.
     bands:  # highest matching band wins; see score.py:score_build_reproducibility
       - score: 100
         when: "containerized or devcontainer_present, AND one_command_build_documented, AND (if attempted) exit_code == 0"
@@ -96,6 +100,10 @@ dimensions:
       - test.unit_present
       - test.integration_present
       - test.test_file_count
+    remediation: >
+      Ensure a test suite exists and is discoverable (pytest/jest/etc. config or conventional test file
+      naming), then re-run with --attempt-test (requires --attempt-build) for a real pass/fail signal —
+      detect-only mode never executes the suite, so this dimension can't reach its top bands without it.
     bands:  # see score.py:score_test_safety_net
       - score: 100
         when: "suite_executes AND coverage_pct >= 70 AND unit_present AND integration_present"
@@ -112,6 +120,10 @@ dimensions:
     weight: 15
     backing_metrics:
       - human_inputs.roadmap_demand_next_2q
+    remediation: >
+      Answer the roadmap-demand human input (business criticality / roadmap demand next two quarters) —
+      this dimension is deliberately human-input-only and cannot be inferred from repo signals; there is
+      no tool to install or command to run that will unblock it.
     bands:  # see score.py:score_change_demand — deliberately human-input-only;
             # commit velocity must never substitute for a human roadmap answer
             # (a quiet repo can be quiet because it's stable, not dying).
@@ -131,6 +143,11 @@ dimensions:
       - structure.cyclic_dependency_count
       - structure.god_nodes
       - structure.avg_fan_out
+    remediation: >
+      Install Graphify (uv tool install graphifyy) and run /map-codebase to build the real dependency
+      graph this dimension needs — see references/optional-tools.md. If Graphify already ran but
+      parser_coverage_pct is still below the usability threshold, the repo's dominant language(s) likely
+      aren't well-covered by tree-sitter grammars; see references/legacy-stack-notes.md.
     bands:  # gated by parser_coverage_pct first — see score.py:score_structural_modularity
       - score: 100
         when: "cyclic_dependency_count == 0 AND god_nodes empty AND avg_fan_out <= 5"
@@ -148,10 +165,20 @@ dimensions:
     backing_metrics:
       - codebase.distinct_stacks_count
       - deps.duplicate_framework_versions
-      - deps.median_majors_behind
+    # deps.median_majors_behind is deliberately NOT a required backing metric: it needs package-registry
+    # network access deps_probe.py never enables by default (see references/optional-tools.md), so
+    # requiring it made this entire dimension permanently unavailable in every default run — a real bug,
+    # not a design choice, found and fixed while adding per-dimension remediation guidance. It's still read
+    # as an optional bonus signal in the top band below when it happens to be available (e.g. a
+    # network-enabled provider added later), but its absence never blocks scoring.
+    remediation: >
+      Reduce stack fragmentation (fewer distinct languages, no framework running two major versions at
+      once) — there's no tool to install here; this is a repo-structure fix, not a detection gap. If this
+      dimension shows unavailable rather than a low score, check codebase.distinct_stacks_count and
+      deps.duplicate_framework_versions specifically — deps.median_majors_behind is never required.
     bands:  # see score.py:score_stack_coherence
       - score: 100
-        when: "distinct_stacks_count <= 2 AND no duplicate framework versions AND median_majors_behind <= 1"
+        when: "distinct_stacks_count <= 2 AND no duplicate framework versions (AND median_majors_behind <= 1, only if that metric happens to be available)"
       - score: 70
         when: "distinct_stacks_count <= 4 AND no duplicate framework versions"
       - score: 40
@@ -166,6 +193,10 @@ dimensions:
     backing_metrics:
       - debt.violations_per_kloc
       - debt.baselineable
+    remediation: >
+      Install semgrep (pip install semgrep) or, for Python-only repos, ruff (pip install ruff) — see
+      references/optional-tools.md. debt.todo_fixme_hack_count is always measured regardless; this
+      dimension specifically needs a real static analyzer for violation counts/severity.
     bands:  # see score.py:score_debt_containability
       - score: 100
         when: "violations_per_kloc <= 5 AND baselineable"
@@ -185,6 +216,10 @@ dimensions:
       - context.adr_count
       - context.domain_glossary_present
       - context.ai_context_present
+    remediation: >
+      Add a README with Install/Setup and Usage/Getting Started sections and code examples (drives
+      readme_quality_score), and/or an ADR log, a domain glossary, or run /generate-project-constitution
+      to populate ai-context/ — any one of these meaningfully improves this dimension.
     bands:  # see score.py:score_context_availability
       - score: 100
         when: "ai_context_present, OR (readme_quality_score >= 80 AND (adr_count > 0 OR domain_glossary_present))"
@@ -203,6 +238,10 @@ dimensions:
       - ops.staging_env_declared
       - structure.cross_stack_edge_count
       - vcs.hotspots
+    remediation: >
+      Declare a staging environment (a docker-compose override, a CI environment definition, or a
+      config/deployment reference containing "staging") — this is also a hard L4 trust-level gate on its
+      own, independent of this dimension's score, since ralph-e2e writes tests against staging.
     bands:  # see score.py:score_blast_radius_containment
       - score: 100
         when: "staging_env_declared AND cross_stack_edge_count == 0"
@@ -222,6 +261,10 @@ dimensions:
     weight: 5
     backing_metrics:
       - structure.parser_coverage_pct
+    remediation: >
+      Install Graphify (uv tool install graphifyy) and run /map-codebase — see
+      references/optional-tools.md. This is the one dimension that reads parser_coverage_pct directly
+      rather than gating on it, so even partial coverage still yields a (low) score once Graphify has run.
     bands:  # see score.py:score_analyzability
       - score: 100
         when: "parser_coverage_pct >= 90"

@@ -416,7 +416,9 @@
         "ops.staging_env_declared",
         "ops.observability_present",
         "ops.feature_flag_system_present",
-        "ops.rollback_mechanism_documented"
+        "ops.rollback_mechanism_documented",
+        "architecture.detected_patterns",
+        "architecture.style_summary"
       ],
       "additionalProperties": false,
       "properties": {
@@ -658,6 +660,12 @@
           "$ref": "#/$defs/metricEnvelope"
         },
         "ops.rollback_mechanism_documented": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "architecture.detected_patterns": {
+          "$ref": "#/$defs/metricEnvelope"
+        },
+        "architecture.style_summary": {
           "$ref": "#/$defs/metricEnvelope"
         }
       }

@@ -668,6 +668,22 @@
       "confidence": "unavailable",
       "coverage_pct": null,
       "notes": "provider not yet implemented"
+    },
+    "architecture.detected_patterns": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
+    },
+    "architecture.style_summary": {
+      "value": null,
+      "unit": "",
+      "source": "",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented"
     }
   }
 }

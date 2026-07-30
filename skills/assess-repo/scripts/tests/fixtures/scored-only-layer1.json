@@ -691,6 +691,22 @@
       "confidence": "unavailable",
       "coverage_pct": null,
       "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "architecture.detected_patterns": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
+    },
+    "architecture.style_summary": {
+      "value": null,
+      "unit": "",
+      "source": "fixture",
+      "confidence": "unavailable",
+      "coverage_pct": null,
+      "notes": "provider not yet implemented (steps 5-6)"
     }
   }
 }

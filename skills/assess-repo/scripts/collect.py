@@ -28,6 +28,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
+import architecture_probe  # noqa: E402
 import context_ops_probe  # noqa: E402
 import exclusions  # noqa: E402
 import validate as validate_mod  # noqa: E402
@@ -42,7 +43,7 @@ GIT_URL_PATTERN = re.compile(
 
 ALL_PROVIDER_NAMES = [
     "git", "language_census", "build_probe", "test_probe", "ci_probe",
-    "deps_probe", "debt_probe", "structure_graphify", "context_ops_probe",
+    "deps_probe", "debt_probe", "structure_graphify", "context_ops_probe", "architecture_probe",
 ]
 
 
@@ -76,6 +77,48 @@ def resolve_target(target: str, depth: int | None) -> tuple[Path, str, bool, str
     return local, "local_path", False, str(local)
 
 
+def _detect_projects(included_files: list[str]) -> tuple[bool, list[dict]]:
+    """Groups manifest-bearing files by containing directory — one project
+    candidate per directory. Reuses build_probe.BUILD_SYSTEM_MARKERS (for
+    stack labels) and deps_probe.MANIFEST_FILES (for the canonical manifest
+    name list) rather than reinventing either. Known limitation: a nested
+    manifest under examples/ or test/fixtures/ counts as a project candidate
+    too — see references/schema.md's note on target.detected_projects."""
+    marker_to_stack: dict[str, str] = {"requirements.txt": "pip"}
+    for stack_name, markers in build_probe.BUILD_SYSTEM_MARKERS.items():
+        for marker in markers:
+            if marker:
+                marker_to_stack[marker] = stack_name
+
+    manifest_names = set(deps_probe.MANIFEST_FILES) | set(marker_to_stack)
+
+    by_dir: dict[str, set[str]] = {}
+    for relpath in included_files:
+        name = Path(relpath).name
+        is_dotnet = name.endswith((".csproj", ".sln"))
+        if name in manifest_names or is_dotnet:
+            directory = str(Path(relpath).parent) if "/" in relpath else "."
+            by_dir.setdefault(directory, set()).add(name)
+
+    projects = []
+    for directory in sorted(by_dir):
+        names = by_dir[directory]
+        stacks = set()
+        for name in names:
+            if name.endswith((".csproj", ".sln")):
+                stacks.add("dotnet")
+            elif name in marker_to_stack:
+                stacks.add(marker_to_stack[name])
+        entrypoint_name = sorted(names)[0]
+        projects.append({
+            "path": directory,
+            "stack": sorted(stacks) or ["unknown"],
+            "build_entrypoint": entrypoint_name if directory == "." else f"{directory}/{entrypoint_name}",
+        })
+
+    return len(projects) > 1, projects
+
+
 def slugify(text: str) -> str:
     text = re.sub(r"\.git$", "", text.strip())
     text = text.rsplit("/", 1)[-1] or "repo"
@@ -105,6 +148,7 @@ CONTEXT_OPS_METRIC_IDS = ["context." + n for n in [
     "db_schema_docs_present", "domain_glossary_present", "ai_context_present"]] + ["ops." + n for n in [
     "deploy_automation_present", "staging_env_declared", "observability_present",
     "feature_flag_system_present", "rollback_mechanism_documented"]]
+ARCHITECTURE_METRIC_IDS = ["architecture." + n for n in ["detected_patterns", "style_summary"]]
 
 
 def main(argv: list[str]) -> int:
@@ -229,6 +273,10 @@ def main(argv: list[str]) -> int:
                                lambda: structure_graphify.collect(local_path, len(included_files))))
     metrics.update(_dispatch("context_ops_probe", CONTEXT_OPS_METRIC_IDS,
                                lambda: context_ops_probe.collect(local_path, included_files)))
+    metrics.update(_dispatch("architecture_probe", ARCHITECTURE_METRIC_IDS,
+                               lambda: architecture_probe.collect(local_path, included_files)))
+
+    is_monorepo, detected_projects = _detect_projects(included_files)
 
     resolved_commit = target_info["resolved_commit"]
     short_sha = resolved_commit[:7] if resolved_commit else "nogit"
@@ -248,8 +296,8 @@ def main(argv: list[str]) -> int:
             "default_branch": target_info["default_branch"],
             "history_complete": target_info["history_complete"],
             "analyzed_path": str(local_path),
-            "is_monorepo": False,
-            "detected_projects": [],
+            "is_monorepo": is_monorepo,
+            "detected_projects": detected_projects,
             "submodules": [],
         },
         "providers": providers_report,

@@ -130,6 +130,12 @@ def base_document(assessment_id: str) -> dict:
         "ops.observability_present": m(True, "bool"),
         "ops.feature_flag_system_present": m(True, "bool"),
         "ops.rollback_mechanism_documented": m(True, "bool"),
+
+        # architecture.* — Phase-0 heuristic only, never wired into a rubric.yaml dimension
+        "architecture.detected_patterns": m(
+            [{"pattern": "Layered / Repository", "confidence": "estimated",
+              "evidence": "both services/ and repositories/ directories present"}], "list", confidence="estimated"),
+        "architecture.style_summary": m("Layered / Repository", "", confidence="estimated"),
     }
 
     return {
@@ -278,7 +284,7 @@ def scenario_only_layer1() -> dict:
     """What collect.py actually produces today: only codebase.* and vcs.* are
     measured, everything else unavailable. Mirrors the real dry-run shape."""
     doc = base_document("fixture-only-layer1")
-    families_to_blank = ["build", "test", "ci", "deps", "structure", "debt", "context", "ops"]
+    families_to_blank = ["build", "test", "ci", "deps", "structure", "debt", "context", "ops", "architecture"]
     for metric_id in list(doc["metrics"].keys()):
         family = metric_id.split(".")[0]
         if family in families_to_blank:

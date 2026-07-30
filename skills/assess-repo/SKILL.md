@@ -30,6 +30,17 @@ providers, `rubric.yaml`, `score.py`, the determinism test suite, `render.py`, a
 Verified end-to-end against a real public repo (Flask) and all 6 verification cases in
 `references/build-order.md`.
 
+Since then: the report now opens with a **Quantitative Codebase Overview** (project/monorepo count, file
+and LOC counts, tech stack, 3rd-party dependency shape, and a cheap heuristic-only "design patterns"
+signal — `architecture.*`, always `confidence: "estimated"`, never wired into scoring) before the verdict,
+and an **Action Items** section right after the verdict that names every failing gate and unmeasurable
+dimension with its specific missing metric and concrete fix — not the old generic "one or more backing
+metrics unavailable." Real monorepo/sub-project detection replaced the previous always-`False`/`[]`
+placeholder. A genuine bug was also found and fixed in the process: `stack_coherence` required
+`deps.median_majors_behind`, which is *permanently* unavailable by design (network-gated, never enabled by
+default) — meaning that dimension was unavailable in literally every default run until this fix dropped it
+from the required set.
+
 **Known limitations, by design, not oversight** — read these before trusting a `GATE_BUILD`/
 `GATE_TEST_SIGNAL` failure at face value:
 
@@ -40,12 +51,19 @@ Verified end-to-end against a real public repo (Flask) and all 6 verification ca
   `ONBOARD_AFTER_REMEDIATION` / trust level `L0` in the default run; that reflects what detect-only mode can
   verify, not the repo's real quality. Use `--attempt-build --attempt-test` (inside a disposable container)
   for a verdict that can reach `ONBOARD_NOW`.
-- **`structure.*` (Graphify) integration is unverified against a real install** — Graphify wasn't available
-  to test against while building this; the parsing code is defensive (falls back to `unavailable`
-  per-metric on any schema mismatch) but its assumed `graph.json` shape is a documented best guess, not a
-  confirmed schema. See `structure_graphify.py`'s module docstring.
-- **`debt_probe.py`'s semgrep/ruff integration is likewise unverified** — neither was installed in this
+- **`structure.*` (Graphify) integration is now verified against a real install** (0.9.29) — see
+  `structure_graphify.py`'s module docstring for the confirmed schema (it originally shipped against a
+  guessed shape that turned out wrong on every field; fixed while building `/map-codebase`, which uses the
+  same real schema).
+- **`debt_probe.py`'s semgrep/ruff integration is still unverified** — neither was installed in this
   build's environment; the fallback (`todo_fixme_hack_count` only) is what's actually been exercised.
+- **`architecture.*`'s pattern detection is a cheap directory-naming/dependency-convention heuristic
+  only** — not real AST-based analysis. It will under-detect real patterns and occasionally over-match a
+  coincidental directory name; treat `style_summary`/`detected_patterns` as a conversation starter, not a
+  finding, and cross-check with `/map-codebase` for anything that matters.
+- **`deps_probe.py` (and therefore the Codebase Overview's 3rd-party section) only scans the repository
+  root** — a monorepo's sub-projects each have their own dependency surface this doesn't see yet; the
+  report says so explicitly when `is_monorepo` is true rather than silently under-reporting.
 - **Legacy-stack gaps** (PL/SQL's utPLSQL not detected, VB6/.cls colliding with Salesforce Apex, WebForms'
   `build.bat` convention not checked) are catalogued in `references/legacy-stack-notes.md` rather than
   silently present.

@@ -134,6 +134,63 @@ class RedistributionTests(unittest.TestCase):
             self.assertFalse(dim["available"], dim)
 
 
+class RemediationDetailTests(unittest.TestCase):
+    """Covers the actionable-remediation fix: unavailable dimensions must name
+    a specific missing metric, every dimension must carry a remediation hint,
+    and stack_coherence must be measurable by default (the real bug found
+    while building this: deps.median_majors_behind is permanently unavailable
+    in deps_probe.py, and stack_coherence used to require it)."""
+
+    def test_unavailable_dimension_names_a_specific_missing_metric(self):
+        result = score.score(load("scored-redistribution.json"), RUBRIC)
+        debt_dim = next(d for d in result["dimensions"] if d["id"] == "debt_containability")
+        self.assertFalse(debt_dim["available"])
+        self.assertNotEqual(debt_dim["reason"], "one or more backing metrics unavailable")
+        self.assertTrue(
+            any(mid in debt_dim["reason"] for mid in ["debt.violations_per_kloc", "debt.baselineable"]),
+            debt_dim["reason"],
+        )
+        self.assertEqual(
+            set(debt_dim["missing_metrics"]), {"debt.violations_per_kloc", "debt.baselineable"},
+        )
+
+    def test_missing_metrics_empty_for_every_available_dimension(self):
+        result = score.score(load("scored-strong.json"), RUBRIC)
+        for dim in result["dimensions"]:
+            self.assertTrue(dim["available"], dim)
+            self.assertEqual(dim["missing_metrics"], [], dim)
+
+    def test_remediation_populated_regardless_of_availability(self):
+        for name in ["scored-strong.json", "scored-redistribution.json", "scored-only-layer1.json"]:
+            result = score.score(load(name), RUBRIC)
+            for dim in result["dimensions"]:
+                self.assertIsNotNone(dim["remediation"], f"{name}: {dim['id']} has no remediation hint")
+
+    def test_structural_modularity_below_threshold_names_the_threshold(self):
+        result = score.score(load("scored-sparse-legacy.json"), RUBRIC)
+        structural = next(d for d in result["dimensions"] if d["id"] == "structural_modularity")
+        self.assertFalse(structural["available"])
+        self.assertEqual(structural["missing_metrics"], [])  # every backing metric IS available here
+        self.assertIn("usability floor", structural["reason"])
+        self.assertIn(str(RUBRIC["thresholds"]["structure_parser_coverage_min_for_use"]), structural["reason"])
+
+    def test_stack_coherence_measurable_when_median_majors_behind_is_unavailable(self):
+        """The real bug: deps.median_majors_behind is permanently unavailable in
+        deps_probe.py (network-gated, never enabled by default) — requiring it
+        made stack_coherence unavailable in every default run. Confirm the fix:
+        the dimension no longer requires it at all."""
+        doc = load("scored-strong.json")
+        doc["metrics"]["deps.median_majors_behind"] = {
+            "value": None, "unit": "", "source": "", "confidence": "unavailable",
+            "coverage_pct": None, "notes": "requires package-registry network access, not enabled by default",
+        }
+        result = score.score(doc, RUBRIC)
+        stack = next(d for d in result["dimensions"] if d["id"] == "stack_coherence")
+        self.assertTrue(stack["available"], stack)
+        self.assertEqual(stack["sub_score"], 100)
+        self.assertNotIn("deps.median_majors_behind", RUBRIC["dimensions"]["stack_coherence"]["backing_metrics"])
+
+
 class VerdictTests(unittest.TestCase):
     def test_strong_repo_onboard_now(self):
         result = score.score(load("scored-strong.json"), RUBRIC)

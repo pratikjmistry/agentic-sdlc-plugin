@@ -83,6 +83,116 @@ def build_dimensions_table(scores: dict) -> str:
     return _md_table(["Dimension", "Weight", "Sub-score", "Evidence"], rows)
 
 
+def _metric_value_or_note(inputs: dict, metric_id: str):
+    """Returns (value, None) when measured, or (None, notes) when unavailable —
+    so a repo missing a lockfile/manifest degrades gracefully in the overview
+    instead of crashing on a None value."""
+    env = inputs["metrics"][metric_id]
+    if env["confidence"] == "unavailable":
+        return None, env["notes"]
+    return env["value"], None
+
+
+def _format_metric_line(inputs: dict, metric_id: str, label: str, formatter=str) -> str:
+    value, notes = _metric_value_or_note(inputs, metric_id)
+    if value is None:
+        return f"- **{label}:** unavailable — {notes}"
+    return f"- **{label}:** {formatter(value)}"
+
+
+def build_codebase_overview_section(inputs: dict) -> str:
+    target = inputs["target"]
+    metrics = inputs["metrics"]
+
+    # --- Projects ---
+    projects = target.get("detected_projects") or []
+    if projects:
+        project_lines = "\n".join(
+            f"  - `{p['path']}` — {', '.join(p['stack'])} ({p['build_entrypoint']})" for p in projects
+        )
+        projects_section = (
+            f"**Projects:** {len(projects)} detected"
+            + (" (monorepo)" if target.get("is_monorepo") else "") + "\n" + project_lines
+        )
+    else:
+        projects_section = (
+            "**Projects:** 1 (single-project repository — no recognized manifest found, "
+            "or detection wasn't run)"
+        )
+
+    # --- Files / LOC ---
+    file_count = metrics["codebase.file_count"]["value"]
+    total_loc = metrics["codebase.total_loc"]["value"]
+    largest = metrics["codebase.largest_file_loc"]["value"]
+    avg = metrics["codebase.avg_file_loc"]["value"]
+    p95 = metrics["codebase.p95_file_loc"]["value"]
+    files_loc_section = (
+        f"- **Files:** {file_count:,}\n"
+        f"- **Total LOC:** {total_loc:,}\n"
+        f"- **File size distribution:** avg {avg} LOC, p95 {p95} LOC, largest {largest} LOC"
+    )
+
+    # --- Tech stack ---
+    language_rows = metrics["codebase.language_census"]["value"] or []
+    stack_table = _md_table(
+        ["Language", "LOC", "%", "Files"],
+        [[row["language"], f"{row['loc']:,}", f"{row['pct']}%", row["files"]] for row in language_rows],
+    )
+    distinct_stacks = metrics["codebase.distinct_stacks_count"]["value"]
+    tech_stack_section = f"{stack_table}\n\n*{distinct_stacks} distinct language(s)/stack(s) detected.*"
+
+    # --- 3rd-party library analysis ---
+    deps_lines = []
+    if target.get("is_monorepo"):
+        deps_lines.append(
+            "- *Note: deps_probe.py currently only scans the repository root, not each detected "
+            "sub-project — the figures below likely under-count a monorepo's real dependency surface.*"
+        )
+    deps_lines += [
+        _format_metric_line(inputs, "deps.manifest_count", "Manifest files found"),
+        _format_metric_line(inputs, "deps.direct_count", "Direct dependencies"),
+        _format_metric_line(inputs, "deps.transitive_count", "Transitive dependencies (resolved lockfile)"),
+    ]
+    dupes, dupes_notes = _metric_value_or_note(inputs, "deps.duplicate_framework_versions")
+    if dupes is not None:
+        if dupes:
+            dupe_desc = "; ".join(f"{d['name']} at majors {', '.join(d['majors'])}" for d in dupes)
+            deps_lines.append(f"- **Duplicate framework versions:** {dupe_desc}")
+        else:
+            deps_lines.append("- **Duplicate framework versions:** none detected")
+    else:
+        deps_lines.append(f"- **Duplicate framework versions:** unavailable — {dupes_notes}")
+    deps_lines.append(
+        "- *Vulnerability/EOL data (deps.eol_components, known_vuln_count_by_severity, "
+        "median_majors_behind) is out of scope by design — it requires network access to package "
+        "registries/advisory databases this pathway never enables by default, not a gap.*"
+    )
+    third_party_section = "\n".join(deps_lines)
+
+    # --- Design patterns ---
+    patterns, patterns_notes = _metric_value_or_note(inputs, "architecture.detected_patterns")
+    style_summary, _ = _metric_value_or_note(inputs, "architecture.style_summary")
+    if patterns is not None:
+        pattern_table = _md_table(
+            ["Pattern", "Confidence", "Evidence"],
+            [[p["pattern"], p["confidence"], p["evidence"]] for p in patterns],
+        ) if patterns else "*(no directory-naming or dependency-convention signal matched)*"
+        design_patterns_section = (
+            f"**Style summary:** {style_summary}\n\n{pattern_table}\n\n"
+            "> Phase-0 heuristic — confidence: estimated; verify with `/map-codebase`."
+        )
+    else:
+        design_patterns_section = f"unavailable — {patterns_notes}"
+
+    return (
+        f"{projects_section}\n\n"
+        f"### Files & Size\n{files_loc_section}\n\n"
+        f"### Key Tech Stack\n{tech_stack_section}\n\n"
+        f"### Third-Party Library Analysis\n{third_party_section}\n\n"
+        f"### Design Patterns (Heuristic)\n{design_patterns_section}"
+    )
+
+
 def build_hotspots_table(inputs: dict) -> str:
     hotspots = inputs["metrics"].get("vcs.hotspots", {}).get("value") or []
     rows = [[h["path"], h["commits_365d"], h["loc"], h["authors"], h["hotspot_score"]]
@@ -108,6 +218,10 @@ def build_unavailable_section(inputs: dict) -> str:
     return "\n".join(lines)
 
 
+def _dimension_driver(dim_id: str) -> str:
+    return "Business/Product owner" if dim_id == "change_demand" else "Varies by phase"
+
+
 def build_effort_table(scores: dict) -> str:
     rows = []
     for g in scores["gates"]:
@@ -116,7 +230,10 @@ def build_effort_table(scores: dict) -> str:
     for d in scores["dimensions"]:
         if d["available"] and d["sub_score"] < 70:
             rows.append([DIMENSION_PHASE_MAP[d["id"]], d["id"], EFFORT_ESTIMATE.get(d["id"], "?")])
-        elif not d["available"] and d["id"] != "change_demand":
+        elif not d["available"]:
+            # No exclusion for change_demand here — answering the roadmap-demand question is
+            # itself a valid, fixable action item toward "make all dimensions measurable," same
+            # as every other unavailable dimension.
             rows.append([DIMENSION_PHASE_MAP[d["id"]], f"{d['id']} (unmeasured)", EFFORT_ESTIMATE.get(d["id"], "?")])
     if not rows:
         return "No blockers identified — every gate passed and every measured dimension scored >= 70."
@@ -130,12 +247,57 @@ def build_blockers_table(scores: dict) -> str:
             rows.append([f"**{g['id']}**", GATE_PHASE_MAP[g["id"]], EFFORT_ESTIMATE[g["id"]],
                           "Engineering (build/test/CI owner)", g["remediation"]])
     for d in scores["dimensions"]:
-        if d["available"] and d["sub_score"] < 70:
+        if not d["available"]:
+            detail = f"{d['remediation']} — {d['reason']}" if d["remediation"] else d["reason"]
+            rows.append([f"{d['id']} (unmeasured)", DIMENSION_PHASE_MAP[d["id"]],
+                          EFFORT_ESTIMATE.get(d["id"], "?"), _dimension_driver(d["id"]), detail])
+        elif d["sub_score"] < 70:
+            detail = f"{d['remediation']} — {d['reason']}" if d["remediation"] else d["reason"]
             rows.append([d["id"], DIMENSION_PHASE_MAP[d["id"]], EFFORT_ESTIMATE.get(d["id"], "?"),
-                          "Varies by phase", d["reason"]])
+                          _dimension_driver(d["id"]), detail])
     if not rows:
         return "*(no blockers — see the dimension table in the report for scores.)*"
     return _md_table(["Blocker", "Phase", "Effort", "Suggested Driver", "Detail"], rows)
+
+
+def build_action_items_section(scores: dict, cap: int = 10) -> str:
+    """A short, prioritized list merging gate failures and dimension problems —
+    the thing meant to be unmissable in the main report, one line per item with
+    its concrete fix. remediation-plan.md's Blockers table has the full detail;
+    this is the 'read this and know what to do' summary."""
+    items: list[str] = []
+
+    for g in scores["gates"]:
+        if not g["passed"]:
+            items.append(f"**[GATE] {g['id']}** — {g['reason']}. Fix: {g['remediation']}")
+
+    unavailable_dims = sorted(
+        (d for d in scores["dimensions"] if not d["available"]),
+        key=lambda d: d["weight"], reverse=True,
+    )
+    for d in unavailable_dims:
+        fix = d["remediation"] or "see references/optional-tools.md"
+        items.append(f"**[UNMEASURED] {d['id']}** (weight {d['weight']}) — {d['reason']}. Fix: {fix}")
+
+    low_score_dims = sorted(
+        (d for d in scores["dimensions"] if d["available"] and d["sub_score"] < 70),
+        key=lambda d: d["weight"], reverse=True,
+    )
+    for d in low_score_dims:
+        fix = d["remediation"] or "see remediation-plan.md"
+        items.append(
+            f"**[LOW SCORE] {d['id']}** ({d['sub_score']}/100, weight {d['weight']}) — {d['reason']}. Fix: {fix}")
+
+    if not items:
+        return "No action items — every hard gate passes and every measured dimension scores >= 70."
+
+    truncated = len(items) > cap
+    lines = [f"{i}. {item}" for i, item in enumerate(items[:cap], start=1)]
+    if truncated:
+        lines.append(f"\n*(+{len(items) - cap} more — see remediation-plan.md for the full ranked list.)*")
+    else:
+        lines.append("\nSee `remediation-plan.md` for the full ranked list with effort estimates and suggested drivers.")
+    return "\n".join(lines)
 
 
 def build_pilot_zone_section(zones: list[dict]) -> str:
@@ -225,6 +387,8 @@ def render_report(repo_name: str, short_sha: str, inputs: dict, scores: dict, zo
         trust_level_display=trust if trust else "N/A",
         evidence_gate_display=evidence_gate or "—",
         verdict_reason=scores["verdict_reason"],
+        codebase_overview_section=build_codebase_overview_section(inputs),
+        action_items_section=build_action_items_section(scores),
         gates_table=build_gates_table(scores),
         dimensions_table=build_dimensions_table(scores),
         hotspots_table=build_hotspots_table(inputs),

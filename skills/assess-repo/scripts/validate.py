@@ -10,7 +10,7 @@ score.py can validate in-process without shelling out.
 
 Prefers the `jsonschema` package when installed (richer, path-qualified error
 messages). Falls back to a dependency-free structural check covering the same
-invariants (required top-level keys, all 80 required metric IDs present, each
+invariants (required top-level keys, all 82 required metric IDs present, each
 metric envelope's required fields, confidence enum, and the
 confidence=="unavailable" <=> value is None invariant) so this script never
 hard-requires a pip install to run.

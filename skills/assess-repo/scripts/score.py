@@ -63,6 +63,23 @@ def _human(assessment: dict, key: str):
     return assessment.get("human_inputs", {}).get(key)
 
 
+def _backing_metric_available(assessment: dict, metric_id: str) -> bool:
+    """Most `backing_metrics` entries are real `metrics[...]` keys, but
+    `change_demand`'s only backing metric is `human_inputs.roadmap_demand_next_2q`,
+    which isn't one — special-cased here so evaluate_dimensions can treat every
+    dimension's backing_metrics list uniformly without a KeyError."""
+    if metric_id.startswith("human_inputs."):
+        key = metric_id[len("human_inputs."):]
+        return assessment.get("human_inputs", {}).get(key) is not None
+    return _available(assessment, metric_id)
+
+
+def _backing_metric_notes(assessment: dict, metric_id: str) -> str:
+    if metric_id.startswith("human_inputs."):
+        return "human input not yet collected — see SKILL.md Step 1 (AskUserQuestion)"
+    return _metric(assessment, metric_id).get("notes", "")
+
+
 # ---------------------------------------------------------------------------
 # Hard gates
 # ---------------------------------------------------------------------------
@@ -230,14 +247,23 @@ def score_structural_modularity(assessment: dict, rubric: dict) -> tuple[int, st
 
 
 def score_stack_coherence(assessment: dict, rubric: dict) -> tuple[int, str] | None:
-    ids = ["codebase.distinct_stacks_count", "deps.duplicate_framework_versions", "deps.median_majors_behind"]
+    # deps.median_majors_behind is deliberately NOT required here — it's permanently unavailable
+    # in deps_probe.py by design (needs package-registry network access, never enabled by
+    # default), so requiring it made this whole dimension permanently unavailable in every
+    # default run. It's still read as an optional bonus signal below when it happens to be
+    # available, but its absence never blocks scoring. See rubric.yaml's stack_coherence comment.
+    ids = ["codebase.distinct_stacks_count", "deps.duplicate_framework_versions"]
     if not _require(assessment, ids):
         return None
     stacks = _value(assessment, "codebase.distinct_stacks_count") or 0
     dupes = _value(assessment, "deps.duplicate_framework_versions") or []
-    majors_behind = _value(assessment, "deps.median_majors_behind") or 0
+    majors_behind = (
+        _value(assessment, "deps.median_majors_behind")
+        if _available(assessment, "deps.median_majors_behind") else None
+    )
+    majors_behind_ok = majors_behind is None or majors_behind <= 1
 
-    if stacks <= 2 and not dupes and majors_behind <= 1:
+    if stacks <= 2 and not dupes and majors_behind_ok:
         return 100, "minimal stack fragmentation, no duplicate framework versions"
     if stacks <= 4 and not dupes:
         return 70, "modest stack count, no duplicate framework versions"
@@ -331,23 +357,53 @@ DIMENSION_FUNCTIONS = {
 }
 
 
+def _unavailable_dimension_reason(assessment: dict, rubric: dict, dim_id: str, missing: list[str]) -> str:
+    if missing:
+        detail = "; ".join(f"{mid} ({_backing_metric_notes(assessment, mid)})" for mid in missing)
+        return f"unavailable — missing backing metric(s): {detail}"
+
+    # Every backing metric IS available, but the dimension's score_* function still declined to
+    # produce a score. Today this only happens for structural_modularity, when
+    # parser_coverage_pct is measured but below the usability floor (see
+    # score_structural_modularity) — give that its own explicit, specific message rather than
+    # falling through to something generic. Any other dimension hitting this branch would be a
+    # genuine score.py bug (a score_* function returning None despite _require() passing), so the
+    # fallback names that possibility rather than silently reusing the old catch-all string.
+    if dim_id == "structural_modularity":
+        threshold = rubric["thresholds"]["structure_parser_coverage_min_for_use"]
+        coverage = _value(assessment, "structure.parser_coverage_pct")
+        return (
+            f"unavailable — structure.parser_coverage_pct ({coverage}%) is measured but below the "
+            f"{threshold}% usability floor for this dimension; the rest of structure.* isn't "
+            f"trustworthy at that coverage — see references/legacy-stack-notes.md"
+        )
+    return (
+        "unavailable — every backing metric is available but the scoring function still declined "
+        "to produce a score; this indicates a bug in score.py's score_" + dim_id + ", not a data gap"
+    )
+
+
 def evaluate_dimensions(assessment: dict, rubric: dict) -> list[dict]:
     results = []
     for dim_id, dim_def in rubric["dimensions"].items():
         fn = DIMENSION_FUNCTIONS[dim_id]
         outcome = fn(assessment, rubric)
+        remediation = (dim_def.get("remediation") or "").strip() or None
+
         if outcome is None:
+            missing = [mid for mid in dim_def["backing_metrics"] if not _backing_metric_available(assessment, mid)]
+            reason = _unavailable_dimension_reason(assessment, rubric, dim_id, missing)
             results.append({
                 "id": dim_id, "weight": dim_def["weight"], "available": False,
-                "sub_score": None, "reason": "one or more backing metrics unavailable",
-                "backing_metrics": dim_def["backing_metrics"],
+                "sub_score": None, "reason": reason, "missing_metrics": missing,
+                "remediation": remediation, "backing_metrics": dim_def["backing_metrics"],
             })
         else:
             sub_score, reason = outcome
             results.append({
                 "id": dim_id, "weight": dim_def["weight"], "available": True,
-                "sub_score": sub_score, "reason": reason,
-                "backing_metrics": dim_def["backing_metrics"],
+                "sub_score": sub_score, "reason": reason, "missing_metrics": [],
+                "remediation": remediation, "backing_metrics": dim_def["backing_metrics"],
             })
     return results
 
