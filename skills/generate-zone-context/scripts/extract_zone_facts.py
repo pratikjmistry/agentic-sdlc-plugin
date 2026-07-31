@@ -190,34 +190,50 @@ def slugify_zone_name(name: str) -> str:
     return slug or "zone"
 
 
-def zones_dir_is_reconcilable(repo_path: Path) -> tuple[bool, str]:
+def zone_paths_dir_is_reconcilable(repo_path: Path, pathspec: str, draft_dir_hint: str) -> tuple[bool, str]:
     """Same 3-branch git-status logic as extract_facts.py's
-    ai_context_is_reconcilable(), pathspec scoped to ai-context/zones/ so a
-    dirty architecture.md doesn't block zone-file generation and vice versa."""
+    ai_context_is_reconcilable(), generalized to any pathspec so
+    ai-context/zones/ and .claude/rules/zones/ can each be checked
+    independently — a dirty one must not block generation into the other."""
     repo_path = Path(repo_path)
     if not (repo_path / ".git").exists():
-        return False, ("not a git repository (no .git at repo root) — cannot verify ai-context/zones/ is "
-                        "unmodified, draft to a staging directory instead of overwriting")
+        return False, (f"not a git repository (no .git at repo root) — cannot verify {pathspec} is "
+                        f"unmodified, draft to {draft_dir_hint} instead of overwriting")
     try:
         result = subprocess.run(
-            ["git", "-C", str(repo_path), "status", "--porcelain", "--", "ai-context/zones/"],
+            ["git", "-C", str(repo_path), "status", "--porcelain", "--", pathspec],
             capture_output=True, text=True, timeout=10,
         )
     except (OSError, subprocess.SubprocessError) as exc:
-        return False, f"git status failed ({exc}) — draft to a staging directory instead of overwriting"
+        return False, f"git status failed ({exc}) — draft to {draft_dir_hint} instead of overwriting"
     if result.returncode != 0:
-        return False, f"git status exited {result.returncode} — draft to a staging directory instead of overwriting"
+        return False, f"git status exited {result.returncode} — draft to {draft_dir_hint} instead of overwriting"
     if result.stdout.strip():
-        return False, ("ai-context/zones/ has uncommitted changes (git status is non-empty) — draft to "
-                        "ai-context/zones/.generate-zone-context-draft/ instead of overwriting")
-    return True, ("ai-context/zones/ matches HEAD (git status is empty) — safe to overwrite; "
-                  "review with `git diff ai-context/zones/` after")
+        return False, (f"{pathspec} has uncommitted changes (git status is non-empty) — draft to "
+                        f"{draft_dir_hint} instead of overwriting")
+    return True, (f"{pathspec} matches HEAD (git status is empty) — safe to overwrite; "
+                  f"review with `git diff {pathspec}` after")
+
+
+def zones_dir_is_reconcilable(repo_path: Path) -> tuple[bool, str]:
+    """Thin wrapper over zone_paths_dir_is_reconcilable() scoped to
+    ai-context/zones/ — kept so existing call sites/tests don't need to change."""
+    return zone_paths_dir_is_reconcilable(
+        repo_path, "ai-context/zones/", "ai-context/zones/.generate-zone-context-draft/")
+
+
+def rules_dir_is_reconcilable(repo_path: Path) -> tuple[bool, str]:
+    """Same helper scoped to .claude/rules/zones/ — checked independently so a
+    dirty ai-context/zones/ doesn't block rule generation and vice versa."""
+    return zone_paths_dir_is_reconcilable(
+        repo_path, ".claude/rules/zones/", ".claude/rules/zones/.generate-zone-context-draft/")
 
 
 def build_zone_facts(zone: dict, graph: dict | None, analysis: dict | None, constitution_facts: dict | None) -> dict:
     slug = slugify_zone_name(zone.get("name", ""))
     zone_id = zone.get("id", "ZONE-00")
     output_filename = f"{zone_id}-{slug}.md"
+    rule_output_path = f".claude/rules/zones/{zone_id}-{slug}.md"
 
     nodes = (graph or {}).get("nodes", [])
     links = (graph or {}).get("links", [])
@@ -229,6 +245,7 @@ def build_zone_facts(zone: dict, graph: dict | None, analysis: dict | None, cons
         "id": zone_id,
         "slug": slug,
         "output_filename": output_filename,
+        "rule_output_path": rule_output_path,
         "zone": zone,
         "map_codebase_available": graph is not None,
         "communities": filter_communities_for_zone(zone_ids, analysis, nodes_by_id),
@@ -247,14 +264,18 @@ def build_all_zone_facts(assessment_dir: Path, repo_path: Path) -> dict:
     map_outputs = find_map_codebase_outputs(repo_path)
     graph_result = load_graph(repo_path)
     graph, analysis = graph_result if graph_result else (None, None)
-    reconcilable, reconcile_detail = zones_dir_is_reconcilable(repo_path)
+    ai_context_reconcilable, ai_context_detail = zones_dir_is_reconcilable(repo_path)
+    rules_reconcilable, rules_detail = rules_dir_is_reconcilable(repo_path)
 
     return {
         "schema_version": "1.0",
         "source_zones_path": str(Path(assessment_dir) / "zones.json"),
         "map_codebase_outputs": map_outputs,
         "constitution_facts_available": constitution_facts is not None,
-        "reconciliation": {"reconcilable": reconcilable, "detail": reconcile_detail},
+        "reconciliation": {
+            "ai_context_zones": {"reconcilable": ai_context_reconcilable, "detail": ai_context_detail},
+            "rules_zones": {"reconcilable": rules_reconcilable, "detail": rules_detail},
+        },
         "zones": [build_zone_facts(z, graph, analysis, constitution_facts) for z in zones],
     }
 

@@ -108,6 +108,21 @@ class ZoneFilteringTests(unittest.TestCase):
         core_facts = ezf.build_zone_facts(self.zone_core, self.graph, self.analysis, None)
         self.assertEqual(core_facts["output_filename"], "ZONE-01-src-core.md")
 
+    def test_rule_output_path_uses_same_id_and_slug_under_claude_rules_zones(self):
+        core_facts = ezf.build_zone_facts(self.zone_core, self.graph, self.analysis, None)
+        self.assertEqual(core_facts["rule_output_path"], ".claude/rules/zones/ZONE-01-src-core.md")
+
+    def test_rule_output_path_handles_single_file_zone_name(self):
+        # Real case seen in this session's own Flask dry run: a zone's `name`
+        # can be a single file, not a directory (e.g. "tests/test_basic.py").
+        # rule_output_path must still be well-formed — it never assumes
+        # zone.name is a directory the way a `<name>/**` glob heuristic would.
+        single_file_zone = {
+            "id": "ZONE-02", "name": "tests/test_basic.py", "paths": ["tests/test_basic.py"],
+        }
+        facts = ezf.build_zone_facts(single_file_zone, None, None, None)
+        self.assertEqual(facts["rule_output_path"], ".claude/rules/zones/ZONE-02-tests-test_basic-py.md")
+
 
 class SlugTests(unittest.TestCase):
     def test_simple_path(self):
@@ -232,6 +247,61 @@ class ReconciliationHelperTests(unittest.TestCase):
 
             reconcilable, detail = ezf.zones_dir_is_reconcilable(repo)
             self.assertTrue(reconcilable, detail)
+
+    def test_dirty_rules_zones_does_not_block_clean_ai_context_zones(self):
+        """The two reconciliation checks are independent: a dirty
+        .claude/rules/zones/ must not affect ai-context/zones/'s own verdict."""
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            self._init_repo(repo)
+            ai_zones = repo / "ai-context" / "zones"
+            rule_zones = repo / ".claude" / "rules" / "zones"
+            ai_zones.mkdir(parents=True)
+            rule_zones.mkdir(parents=True)
+            (ai_zones / "ZONE-01-src-core.md").write_text("# Zone\n")
+            (rule_zones / "ZONE-01-src-core.md").write_text("---\npaths: []\n---\n")
+            subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+            subprocess.run(["git", "-C", str(repo), "commit", "-q", "-m", "init"], check=True)
+            (rule_zones / "ZONE-01-src-core.md").write_text("---\npaths: [\"edited\"]\n---\n")
+
+            ai_context_reconcilable, _ = ezf.zones_dir_is_reconcilable(repo)
+            rules_reconcilable, rules_detail = ezf.rules_dir_is_reconcilable(repo)
+            self.assertTrue(ai_context_reconcilable)
+            self.assertFalse(rules_reconcilable)
+            self.assertIn("uncommitted changes", rules_detail)
+
+    def test_dirty_ai_context_zones_does_not_block_clean_rules_zones(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            self._init_repo(repo)
+            ai_zones = repo / "ai-context" / "zones"
+            rule_zones = repo / ".claude" / "rules" / "zones"
+            ai_zones.mkdir(parents=True)
+            rule_zones.mkdir(parents=True)
+            (ai_zones / "ZONE-01-src-core.md").write_text("# Zone\n")
+            (rule_zones / "ZONE-01-src-core.md").write_text("---\npaths: []\n---\n")
+            subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+            subprocess.run(["git", "-C", str(repo), "commit", "-q", "-m", "init"], check=True)
+            (ai_zones / "ZONE-01-src-core.md").write_text("# Zone (locally edited)\n")
+
+            ai_context_reconcilable, _ = ezf.zones_dir_is_reconcilable(repo)
+            rules_reconcilable, _ = ezf.rules_dir_is_reconcilable(repo)
+            self.assertFalse(ai_context_reconcilable)
+            self.assertTrue(rules_reconcilable)
+
+
+class BuildAllZoneFactsReconciliationTests(unittest.TestCase):
+    def test_reconciliation_has_both_keys(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            assessment_dir = Path(tmp) / "assessment"
+            repo_dir = Path(tmp) / "repo"
+            _write_assessment(assessment_dir)
+            repo_dir.mkdir()
+            result = ezf.build_all_zone_facts(assessment_dir, repo_dir)
+            self.assertIn("ai_context_zones", result["reconciliation"])
+            self.assertIn("rules_zones", result["reconciliation"])
+            self.assertIn("reconcilable", result["reconciliation"]["ai_context_zones"])
+            self.assertIn("reconcilable", result["reconciliation"]["rules_zones"])
 
 
 if __name__ == "__main__":

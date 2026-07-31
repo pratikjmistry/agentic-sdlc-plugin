@@ -50,3 +50,40 @@ comes from `zones.json` and `docs/codebase-map.md`/`.graphify_analysis.json` dir
 link above. A repo that has run `/map-codebase` but not yet `/discover-constitution` can still get full,
 useful zone context files — the cross-reference section just says "Not available — run
 `/discover-constitution`" instead of linking anywhere.
+
+## The `.claude/rules/zones/` auto-load mechanism
+
+`ai-context/zones/<zone.id>-<slug>.md` only gets read if someone already knows to go look for it. Claude
+Code has a real, separate mechanism for auto-loading context based on which files are actually being
+touched: a `.claude/rules/*.md` file with a `paths:` (plural) frontmatter field — a list of globs — whose
+markdown body loads automatically once a matching file enters context. `/generate-zone-context` writes one
+such rule per zone, at `.claude/rules/zones/<zone.id>-<slug>.md`, as a **thin pointer** to the full context
+file (see `templates/zone-rule.md`'s "Hard Rule" — never a second copy of the drill-down tables).
+
+**What's confirmed, from current Claude Code documentation (not guessed):**
+- `paths:` is documented for `.claude/rules/*.md` files only — never `SKILL.md`, never frontmatter anywhere
+  else in the repo (frontmatter outside `.claude/rules/` is not parsed at all by Claude Code).
+- A rule with no `paths:` field loads unconditionally, for every file. A rule with `paths:` only loads once
+  a matching file enters context.
+- A single rule's whole `paths` list shares a combined budget of 1,000 expanded patterns and 4 MiB. Brace
+  groups multiply the pattern count (`src/*.{ts,tsx}` = 2 patterns); non-brace patterns count as 1 each.
+  Not a practical concern at current zone sizes — `zones.json` carves zones from a handful to a few dozen
+  churn-ranked files, never a whole subtree — but worth knowing if a future zone ever grows large.
+- Multiple rule files can coexist, including in subdirectories (`.claude/rules/zones/` is exactly this).
+- The markdown body is injected verbatim into context once triggered.
+
+**What's inferred with high but not total confidence** — not stated outright in the documentation, only
+consistent across every example:
+- Glob resolution is relative to the project root.
+- Triggering happens on Read-style file access, not on every tool use (Edit/Write/Grep behavior isn't
+  explicitly confirmed either way).
+
+Because of that gap, `SKILL.md`'s Step 3 summary tells the user to empirically check that at least one
+generated rule actually loads — open a file inside a zone in a fresh session and confirm the rule's content
+appeared (e.g. via `/context`) — rather than treating the inferred behavior as guaranteed.
+
+**Why `paths:` uses each zone's exact `paths` list, never a directory glob like `<zone.name>/**`:** a
+zone's `name` is not always a directory. This session's own real Flask dry run produced a zone named
+`tests/test_basic.py` — a single file. A directory-glob heuristic would have silently generated a rule that
+matches nothing for that zone; the exact-path list is always correct because it's the same list `zones.json`
+itself already validated as this zone's content, never widened or guessed at.
