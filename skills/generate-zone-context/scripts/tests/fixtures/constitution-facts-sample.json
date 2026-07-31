@@ -1,0 +1,22 @@
+{
+  "facts": {
+    "architecture": {
+      "risk_areas": [
+        {
+          "kind": "zone_blast_radius",
+          "identifier": "src/core",
+          "detail": "blast_radius=wide, coupling_score=0.72, churn_rank=1",
+          "why": "Wide blast radius plus high churn \u2014 prioritize a characterization test here before /plan-seams proposes a seam.",
+          "confidence": "derived"
+        },
+        {
+          "kind": "god_node",
+          "identifier": "EngineCore",
+          "detail": "fan_in=40, fan_out=22 at src/core/engine.py",
+          "why": "High-coupling hub \u2014 a seam candidate for /plan-seams.",
+          "confidence": "derived"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "communities": {
+    "0": [
+      "n1",
+      "n2"
+    ],
+    "1": [
+      "n3",
+      "n4"
+    ],
+    "2": [
+      "n5"
+    ]
+  },
+  "cohesion": {
+    "0": 0.8,
+    "1": 0.6,
+    "2": 1.0
+  },
+  "gods": [
+    {
+      "id": "n2",
+      "label": "EngineCore",
+      "degree": 5
+    },
+    {
+      "id": "n4",
+      "label": "Utils",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "n2",
+      "target": "n4",
+      "source_files": [
+        "src/core/engine.py"
+      ],
+      "confidence": 0.9,
+      "relation": "calls",
+      "why": "cross-community dependency"
+    },
+    {
+      "source": "n4",
+      "target": "n5",
+      "source_files": [
+        "src/util.py"
+      ],
+      "confidence": 0.7,
+      "relation": "calls",
+      "why": "cross-community dependency"
+    }
+  ],
+  "questions": [],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

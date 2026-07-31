@@ -1,0 +1,40 @@
+[
+  {
+    "id": "ZONE-01",
+    "name": "src/core",
+    "paths": [
+      "src/core/engine.py"
+    ],
+    "stack": [
+      "py"
+    ],
+    "loc": 800,
+    "coverage_pct": null,
+    "churn_rank": 1,
+    "coupling_score": 0.72,
+    "blast_radius": "wide",
+    "recommended_trust_level": "L0",
+    "blockers": [
+      "GATE_TEST_SIGNAL"
+    ],
+    "rationale": "Highest combined churn x size in this pass."
+  },
+  {
+    "id": "ZONE-02",
+    "name": "src/util",
+    "paths": [
+      "src/util.py"
+    ],
+    "stack": [
+      "py"
+    ],
+    "loc": 200,
+    "coverage_pct": null,
+    "churn_rank": 2,
+    "coupling_score": 0.1,
+    "blast_radius": "contained",
+    "recommended_trust_level": "L1",
+    "blockers": [],
+    "rationale": "Second-highest combined churn x size in this pass."
+  }
+]

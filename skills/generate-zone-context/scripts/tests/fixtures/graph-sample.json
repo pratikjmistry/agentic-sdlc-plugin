@@ -1,0 +1,55 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "engine.py",
+      "file_type": "file",
+      "source_file": "src/core/engine.py",
+      "community": "0"
+    },
+    {
+      "id": "n2",
+      "label": "EngineCore",
+      "file_type": "function",
+      "source_file": "src/core/engine.py",
+      "community": "0"
+    },
+    {
+      "id": "n3",
+      "label": "util.py",
+      "file_type": "file",
+      "source_file": "src/util.py",
+      "community": "1"
+    },
+    {
+      "id": "n4",
+      "label": "Utils",
+      "file_type": "function",
+      "source_file": "src/util.py",
+      "community": "1"
+    },
+    {
+      "id": "n5",
+      "label": "outside.py",
+      "file_type": "file",
+      "source_file": "src/other/outside.py",
+      "community": "2"
+    }
+  ],
+  "links": [
+    {
+      "source": "n2",
+      "target": "n4",
+      "relation": "calls",
+      "source_file": "src/core/engine.py"
+    },
+    {
+      "source": "n4",
+      "target": "n5",
+      "relation": "calls",
+      "source_file": "src/util.py"
+    }
+  ]
+}

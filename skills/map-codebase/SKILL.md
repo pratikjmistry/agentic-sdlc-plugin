@@ -33,9 +33,9 @@ BROWNFIELD ONBOARDING:
                           →  /plan-seams (Phase 5)  →  graduated autonomy (Phase 6)  →  /verify-context (Phase 7)
 ```
 
-`/discover-constitution` and `/generate-zone-context` — this phase's other two named skills — are not yet
-built. `/map-codebase`'s output (`graphify-out/graph.json`, `docs/codebase-map.md`) is what they're
-expected to consume once they exist; this skill does not write `ai-context/` files itself.
+`/discover-constitution` reads this skill's output (`graphify-out/graph.json`, `docs/codebase-map.md`) to
+draft `ai-context/` files — this skill does not write `ai-context/` files itself. `/generate-zone-context`,
+this phase's other named skill, is not yet built.
 
 **Input:** a git URL or local path (same auto-detection as `/assess-repo`), ideally one `/assess-repo` has
 already scored. If `.assessment/<repo>-<shortsha>/assessment-scores.json` exists for this repo, read it
@@ -186,8 +186,8 @@ Architectural hubs       : [N]
 Hidden coupling ("surprises") : [N]
 Candidate entry points   : [N]
 
-Next: /discover-constitution (not yet built) would read this map to draft ai-context/ from the code
-itself, or explore directly with `graphify query "<question>"` / `graphify explain "<symbol>"`.
+Next: run /discover-constitution to draft ai-context/ from the code itself, or explore directly with
+`graphify query "<question>"` / `graphify explain "<symbol>"`.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
